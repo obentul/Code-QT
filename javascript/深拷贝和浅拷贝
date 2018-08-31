@@ -1,0 +1,30 @@
+javascript中，当对字符串，int类型等基本数据类型赋值时，是传值赋值的。但是，如果是对象赋值，那么就会变成创建一个引用，然后指向原值，这就和c++中的引用是一样的。有如下例子：
+
+var a="abc"
+var b=a
+a="efg"
+console.log(b)
+-----------------
+这里的输出依旧是abc，因为是传值
+
+
+var a={"name":"zhangsan","age":29}
+var b=a
+a.name="lisi"
+console.log(b.name)
+----------------
+这里的输出便是lisi，因为是传引用
+
+
+
+那么如果我想要两个对象，而不是一个对象和两个指针，怎么办？
+可以通过创建一个实例，然后逐个条目赋值的方式：
+
+function cloneObj(obj) {
+  var newObj = {}
+  for(var prop in obj) {
+    newObj[prop] = obj[prop]
+  }
+  return newObj
+}
+
