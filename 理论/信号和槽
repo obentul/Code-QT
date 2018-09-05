@@ -1,0 +1,18 @@
+信号和槽是针对 “实例” ，不是针对 “某个类”
+对于类A和类B，只能对A的实例A1和B的实例B2进行信号和槽的绑定
+
+比如  
+A.h
+signals:
+    void isUploadChanged(bool arg);
+    void isDownloadChanged(bool arg);
+    
+B.h
+public slots：
+    void setIsUpload(bool arg);
+    void setIsDownload(bool arg);
+    
+又有A的实例A1，B的实例B2，那么可以通过connect来绑定 A1的isUploadChanged和B2的setIsUpload，以及isDownloadChanged和setIsDownload
+操作如下：
+        connect(A1,&A::isUploadChanged,B2,&B::setIsUpload);
+        connect(A1,&A::isDownloadChanged,B2,&B::setIsDownload);
