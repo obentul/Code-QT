@@ -1,0 +1,29 @@
+#1  --  屏蔽空格和空字符串
+        function isNull( str ){//字符串为空或者全空格
+            if ( str === "" ) return true;
+            var regu = "^[ ]+$";
+            var re = new RegExp(regu);
+            return re.test(str);
+        }
+
+#2  --  屏蔽特殊字符
+        function containSpecialCharater( str ){//字符串为空或者全空格
+            if ( str === "" ) return true;
+            var regu = "[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]";
+            var re = new RegExp(regu);
+            return re.test(str);
+        }
+
+#3  --  替换空格为指定字符，替换特殊字符为指定字符
+        function replaceNull( str ){//字符串为空或者全空格
+            if ( str === "" ) return true;
+            var regu = "^[ ]+$";
+            var re = new RegExp(regu);
+            return re.replace(reg,"");
+        }
+        function replaceSpecialCharater( str ){//字符串为空或者全空格
+            if ( str === "" ) return true;
+            var regu = "[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]";
+            var re = new RegExp(regu);
+            return re.replace(reg,"");
+        }

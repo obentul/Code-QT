@@ -1,0 +1,30 @@
+#1 -- 元对象系统有如下功能：
+1. 为 “对象间通讯” 提供信号和槽机制；
+2. run-time类的信息
+3. 动态属性系统
+
+#2 -- 如果一个c++类想被纳入元对象系统，那么需要具备如下三个条件：
+1. 是QObject的子类
+2. 使用Q_OBJECT宏修饰
+3. 使用moc编译(可不管)
+
+#3 -- 元对象系统还会提供如下默认功能（方法）：
+1. QObject::metaObject() 可以用来返回一个指定类的 元对象实例
+2. QMetaObject::className() 返回某个元对象的类名(和第一条互为反操作，一个是通过类名获取实例，一个是通过实例反向获取类名)
+3. QObject::inherits() 用来判断当前实例是否是某个类的子类或者孙类
+4. QObject::tr() and QObject::trUtf8() 字符串转化
+5. QObject::setProperty() and QObject::property() 通过name来动态获取和设置属性
+6. QMetaObject::newInstance() 为一个类创建一个新实例
+
+#4 -- 可使用 qobject_cast() 来完成向下转型，例如：
+For example, let's assume MyWidget inherits from QWidget and is declared with the Q_OBJECT macro:
+      QObject *obj = new MyWidget;
+The obj variable, of type QObject *, actually refers to a MyWidget object, so we can cast it appropriately:
+      QWidget *widget = qobject_cast<QWidget *>(obj);
+(为什么不直接强制类型转换呢？请看下面这个回答https://blog.csdn.net/qq_19528953/article/details/52577265)
+-----小结：如果使用强制类型转换，那么一定会成功，即使是没有正确转换，因此更好更安全的做法是使用qobject_cast完成类型转换-----
+
+we strongly recommend that all subclasses of QObject use the Q_OBJECT macro regardless of whether or not they 
+actually use signals, slots, and properties.
+如果想使用信号和槽以及属性，那么必须满足#2的1和2,即使是不使用这些东西，那么在完成父子类转型的时候依旧会遇到问题，因此强烈推荐使用
+QObject和Q_OBJECT macro修饰每一个需要在 QT 中使用的类
