@@ -1,0 +1,3 @@
+MyTreeView.qml  	:  	使用column和ListView实现TreeView，具备拖拽功能
+MyFavoriteView.qml	:	使用MyTreeView.qml构建的自己的TreeView及其配套功能函数
+
