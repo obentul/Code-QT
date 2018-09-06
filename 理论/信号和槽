@@ -16,3 +16,8 @@ public slots：
 操作如下：
         connect(A1,&A::isUploadChanged,B2,&B::setIsUpload);
         connect(A1,&A::isDownloadChanged,B2,&B::setIsDownload);
+
+
+
+Execution of the code following the emit statement will occur once all slots have returned
+当使用emit发送信号的时候，emit会阻塞，知道所有挂到当前signal上的slot都执行完毕，才会继续执行emit后面的代码
