@@ -1,0 +1,26 @@
+注：下面讨论的类都是指从QObject类继承的类。
+
+------------------------------------------------------------------------------------------------------------------------
+
+每个从QObject继承过来的类都有一个children列表，当我们创建一个对象，并指定其parent时，这个对象就被添加到其parent对象的children列表
+中。
+
+可视化类除了有自己的QObject parent之外，还有自己的可视化 parent。这两个parent不一定要一样。
+
+(*)局部对象的创建顺序：
+局部对象的析构是从下向上的，因此父对象一定要早于子对象创建，不然会有问题。比如：
+  int main()
+  {
+      QWidget window;
+      QPushButton quit("Quit", &window);
+      ...
+  } //OK的
+  
+  int main()
+  {
+      QPushButton quit("Quit");
+      QWidget window;
+
+      quit.setParent(&window);
+      ...
+  } //不行
