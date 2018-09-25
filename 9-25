@@ -15,3 +15,6 @@ main.cpp的main函数是最先执行的函数，main函数中一般可以按照�
   6. 设置启动 qml 文件，加载首个 widget，一般这个qml可以设置为登录界面，如果不需要登录界面，那么直接设置成主界面的qml
   7. 程序启动，入死循环等待信号。 return app.exec()
   
+#3 -- KeyNavigation
+      和MouseArea一样，作为attach属性出现在其他组件中
+      用来控制上下左右键，进而完成“焦点的切换”
