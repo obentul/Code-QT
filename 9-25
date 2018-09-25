@@ -12,6 +12,6 @@ main.cpp的main函数是最先执行的函数，main函数中一般可以按照�
      在qml中就可以直接创建  AddrInfo类的实例。这样就能在qml中创建多实例的c++类了
   5. 实例化单实例的c++类，同时注册成一个qml类，从而在qml中使用。
       例如：engine->rootContext()->setContextProperty("myConfigCommand", configCommand);
-  6. 设置启动 qml 文件，加载收个 widget
+  6. 设置启动 qml 文件，加载首个 widget，一般这个qml可以设置为登录界面，如果不需要登录界面，那么直接设置成主界面的qml
   7. 程序启动，入死循环等待信号。 return app.exec()
   
