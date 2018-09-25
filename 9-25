@@ -1,2 +1,17 @@
 #1
 QMetaObject::invokeMethod
+
+#2 -- 工程的基本架构
+main.cpp的main函数是最先执行的函数，main函数中一般可以按照如下规律来布置代码：
+  1. 日志相关
+  2. 创建app，QApplication app()，这里主要是完成一些qt core的启动，比如信号机制，元对象系统等等
+  3. 根据应用程序的用途，创建engine，如果是widget，则QQmlApplicationEngine *engine = new QQmlApplication;
+     如果是无界面的程序，则QCoreApplication *engine = new 则QCoreApplication;
+        ....
+  4. 注册c++类，让qml可以使用，使用qmlRegisterType来实现。例如：qmlRegisterType<AddrInfo>("addrCommand", 1, 0, "AddrInfo");
+     在qml中就可以直接创建  AddrInfo类的实例。这样就能在qml中创建多实例的c++类了
+  5. 实例化单实例的c++类，同时注册成一个qml类，从而在qml中使用。
+      例如：engine->rootContext()->setContextProperty("myConfigCommand", configCommand);
+  6. 设置启动 qml 文件，加载收个 widget
+  7. 程序启动，入死循环等待信号。 return app.exec()
+  
