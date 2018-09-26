@@ -1,0 +1,4 @@
+    QQmlEngine *engine = Utility::createUtilityClass ()->qmlEngine ();
+    QString qmlName = "qrc:/qml/panels/ChatPage.qml";
+    QQmlComponent component(engine, qmlName);
+    QQuickItem *item = qobject_cast<QQuickItem*>(component.create ());
