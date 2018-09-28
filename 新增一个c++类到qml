@@ -1,0 +1,20 @@
+qmlRegisterType<MyWindow>("../mywindow", 1,0, "MyQuickWindow");
+
+MyWindow	:	c++类的类名
+"../mywindow"	:	cpp文件的全路径(源码文件的url路径)
+1		:	主版本号
+0		:	次版本号
+"MyQuickWindow"	:	在qml中的组件名
+
+	注：这里可以通过engine->addImportPath()来指定import路径，这样在批量导入的时候就不要总是输入全路径那么麻烦了，比如：
+	    engine->addImportPath(currAppPath+"/../");
+	    qmlRegisterType<MyWindow>("mywindow", 1,0, "MyQuickWindow");
+	    这里就把上一级目录作为import的路径之一
+
+使用：在main.qml中，如果想使用mywindow.cpp中定义的MyWindow类，可以按照如下步骤：
+	1.在main.cpp中使用qmlRegisterType<MyWindow>("../mywindow", 1,0, "MyQuickWindow");
+	2.在main.qml的文件头位置import mywindow 1.0
+	3.在main.qml中使用： MyQuickWindow{
+				id:mywindow_1
+			     }
+
