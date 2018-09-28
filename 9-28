@@ -1,0 +1,2 @@
+#1 如果试图使用页面的长和宽，那么一定要定义onWidthChanged和onHeightChanged信号，因为页面在刚刚加载完毕的时候，长和宽都是0！而恰恰此时
+   却已经进入了onCompleted信号，所以如果不知道的话，在onCompleted信号中获得的长和宽都是0
