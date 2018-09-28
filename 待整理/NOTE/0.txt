@@ -136,8 +136,12 @@
 
 	 一句话：在任何想用的地方(正常的思维就是在main函数中)，使用qmlRegisterType函数来注册。
 	   
-		但是，qmlRegisterType是一个模板函数，那么现在我想明确指定模板参数T的类型，那么就需要使用到显示实例化(/home/yangkun/Git/Code-plusplus/Basic/函数模板/4.cpp)
-		例如：qmlRegisterType<ColorMaker>("../src/",1,0,"ColorMaker");    //源码路径为../src，注册后可使用ColorMaker作为元素名(类名)，中间两个参数是版本号，不用管
+	但是，qmlRegisterType是一个模板函数，那么现在我想明确指定模板参数T的类型，那么就需要使用到显示实例化(/home/yangkun/Git/Code-plusplus/Basic/函数模板/4.cpp)
+
+	例如：qmlRegisterType<ColorMaker>("../src/",1,0,"MyColorMaker");  
+	 //源码路径为../src，
+	//ColorMaker为需要注册为qml类型的c++类(即自定义组件的c++源码)
+	//MycolorMaker为再qml中使用ColorMaker时，使用的名称。比如在main.qml中想用ColorMaker这个c++类，只要使用MycolorMaker{ }创建即可
 		
 
 #14  ---  10~12说了  如何定义类

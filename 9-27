@@ -1,0 +1,14 @@
+#1 在qml中，如何让组件之间互相发信号(前提是信号接收方声明了相应的signals)，例如：
+
+	Button{
+		id:b_a
+	}
+	Button{
+		id:b_b
+
+		onClicked:{
+			emit:b_a.onClicked()
+		}
+	}
+	
+	//这里一点点击b_b，就会触发b_a
