@@ -1,0 +1,33 @@
+可以使用findchild函数来按照objectname寻找qml中的对象
+
+比如，已经知道某个window的指针 m_messagePageItem ，这个window中有一个rectangle，objectname是 ”rec1“
+
+那么可以这样来获取这个”rec1“  ： QQuickItem* tmp = m_messagePageItem->findChild<QQuickItem*>("rec1")
+
+后面就可以直接使用tmp了，如果这个rec1是单实例的，那么可以把它存到 堆 里面，或者全局变量中，以反复使用。
+
+举个例子，创建一个  ChatPage.qml ，并把它放到 messagewindow.qml 中的 组件Rec1 中：
+
+//获取一个qml engine
+QQmlApplicationEngine *engine = new QQmlApplicationEngine;
+//获取chatpage.qml的文件路径
+QString qmlName_ChatPage = "qrc:/qml/widgets/ChatPage.qml";
+QString qmlName_MessageWindow = "qrc:/qml/widgets/MessageWindow.qml"
+//在engine中注册目标qml，注册为临时变量component
+QQmlComponent component_ChatPage(engine, qmlName_ChatPage);
+QQmlComponent component_MessageWindow(engine, qmlName_MessageWindow);
+//实例化临时变量component
+QQuickItem *item_ChatPage = qobject_cast<QQuickItem*>(component_ChatPage.create ());
+QQuickItem *item_MessageWindow = qobject_cast<QQuickItem*>(component_MessageWindow.create ());
+//设置父子关系
+	//1.先在MessageWindow.qml中找到Rec1的地址
+QQuickItem* Rec1 = item_MessageWindow->findChild<QQuickItem*>("Rec1");
+	//2.将item_ChatPage的parent设置成Rec1
+item_ChatPage->setParentItem(Rec1);
+
+
+
+
+小结：qt界面应用中，父子关系树，很重要，所以 setParentItem 和 findChild 也和很重要
+
+
