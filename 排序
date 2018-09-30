@@ -1,0 +1,5 @@
+void MMediaCommand::sortItemsList()
+{
+    qSort(MMediaCommand::list_allGridItems);
+    qSort(MMediaCommand::list_vaccantGridItems);
+}
