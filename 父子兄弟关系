@@ -1,0 +1,23 @@
+void MMediaCommand::setActivePage(QString uid)
+{
+    QQuickItem *cur_chatpage = map_chatPage[uid];
+    QQuickItem *cur_chatpage_parent = cur_chatpage->parentItem();
+    LOG(INFO)<<"XXXXXXXXXXXXXX 0 XXXXXXXXXXXX";
+    LOG(INFO)<<cur_chatpage_parent->objectName().toStdString();
+    QList<QQuickItem *> cur_chatpage_brothers = cur_chatpage_parent->childItems();
+    //QList<QQuickItem *> cur_chatpage_brothers = cur_chatpage_parent->findChildren<QQuickItem *>(QString(), Qt::FindDirectChildrenOnly);
+    if(cur_chatpage_brothers.isEmpty()){
+        LOG(INFO)<<"THRER IS NO BROTHERS";
+    }
+    LOG(INFO)<<"XXXXXXXXXXXXXX 1 XXXXXXXXXXXX";
+    foreach (QQuickItem *tmp, cur_chatpage_brothers) {
+        LOG(INFO)<<"XXXXXXXXXXXXXX 2 XXXXXXXXXXXX";
+        qDebug() << "set to invisible";
+        LOG(INFO)<<"XXXXXXXXXXXXXX 3 XXXXXXXXXXXX";
+        tmp->setVisible(false);
+        LOG(INFO)<<"XXXXXXXXXXXXXX 4 XXXXXXXXXXXX";
+    }
+    //map_chatPage[uid]->setProperty("visible",true);
+    map_chatPage[uid]->setVisible(true);
+    qDebug() << uid << "set to visible";
+}
