@@ -1,0 +1,18 @@
+定义：
+
+                var data = {
+                    "mode": "right",//要判断发送者是不是自己（这条消息是发送的还是接收的）
+                    "message_info": info,//消息内容
+                    "sender_name": "",
+                    "time":time,
+                    "status":"",                    //消息状态
+                    "sequence_no":sequence_no,                  //消息流水号
+                    "callid":""                     //callid
+                }
+
+
+使用：
+
+                获取mode的值：      data.mode
+                设置status的值：    data.status="xxxx"
+                

@@ -1,0 +1,1 @@
+QPainter的定位：QPainter的主要作用是画图，可以理解为绘图板，如果想Rectangle这样的标准图形不再能满足需求了，那么可以考虑使用QPainter来绘制图形

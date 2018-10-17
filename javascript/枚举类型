@@ -1,0 +1,31 @@
+javascript中没有枚举类型，所以通过json格式的数据来模仿：
+
+
+    property var msg_status:{
+        "init":"init",
+        "success":"success",
+        "sending":"sending",
+        "timeout":"timeout",
+        "resend":"resend"
+    }
+
+    property var oneweek:
+    {
+        "Mon":1,
+        "Tue":2,
+        "Wen":3,
+        "Thu":4,
+        "Fri":5,
+        "Sat":6,
+        "Sun":7
+    }
+
+
+
+那么如果想使用这个类型:
+
+
+    int today = oneweek.Mon
+    string status = msg_status.success
+
+
