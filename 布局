@@ -1,0 +1,30 @@
+当前常使用的布局有：Row,Column,Flow
+
+
+Row: 水平布局
+Column：垂直布局
+Flow：水平/垂直，当内部组件长度/高度和超过单行/列的尺寸是，自动换行/列
+
+
+ Flow {
+          anchors.fill: parent
+          anchors.margins: 4
+          spacing: 10
+
+          Text { text: "Text"; font.pixelSize: 40 }
+          Text { text: "items"; font.pixelSize: 40 }
+          Text { text: "flowing"; font.pixelSize: 40 }
+          Text { text: "inside"; font.pixelSize: 40 }
+          Text { text: "a"; font.pixelSize: 40 }
+          Text { text: "Flow"; font.pixelSize: 40 }
+          Text { text: "item"; font.pixelSize: 40 }
+      }
+
+
+输出：
+Text items
+flowing inside
+a Flow item
+
+
+注意：在Flow中，有一个特点，不会去拆分元素，如果剩下的尺寸不够容纳的时候，那么就换行，不会把元素一分为二
