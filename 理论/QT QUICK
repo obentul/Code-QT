@@ -1,0 +1,135 @@
+#1  -  QT QUICK和QT QML都是 QT的module，QUICK 为 QML提供基础支撑，让QML能够作为一种语言顺利的被使用。
+        QML engine和QML语法规则都是由QUICK提供的。可以理解为QUICK是QML的支撑库
+
+#2  -  QUICK即提供了QML的语法基础，又提供了使用c++扩展QML的途径
+
+            小结：可以理解为  QUICK是c++写的一套库，这个库就是QML语言，同时QUICK还开放了一些接口，让用户注册自己的c++代码成为QML类型
+
+#3  -  可视画布：QUICK提供了一个包含z值的平面坐标系，作为可视画布，以供开发者布局自己的组件。
+            针对此画布，在编程时主要从如下三点着手
+            1）坐标系统，最左上角的坐标值为(0,0)，x，y值向右下角开始递增
+            2）父子关系，任何组件都要明确自己在父子关系树中的位置
+            3）场景布景(渲染)，当使用1）和2）完成了总体布局和依附关系后，需要使用类似于OpenGL这样库来对各个组件进行渲染
+
+       可视画布编程主要完成的就是上述1,2,3步，完成后，程序也就完成了
+
+#3.1  -  坐标系统：从左上角开始，如果某个组件有父组件，那么其坐标系统是针对父组件的，是相对坐标系。
+            Rectangle{
+                id:r_1
+                x:10
+                y:10
+                Rectangel{
+                    id:r_2
+                    x:0
+                    y:0
+                }
+            }
+        则r_2在r_1的最左上角
+
+#3.2  -  父子关系：在qml编程中，放在谁内部，谁就是parent，如果某个item的parent被设置成null，那么这个item将不被实例化
+       
+       对于同级的子item，其绘制顺序是按照从上到下的，所以后书写的占有更高的z值
+        Rectangle {
+          color: "#272822"
+          width: 320
+          height: 480
+
+             Rectangle {
+                 y: 64
+                 width: 256
+                 height: 256
+                 color: "green"
+            }
+
+            Rectangle {
+                 x: 64
+                 y: 172
+                 width: 256
+                 height: 256
+                color: "blue"
+            }
+         }  
+         这里，blue的方块就会覆盖green
+
+       对于不同子树的item，z值互不影响，即父亲辈的item之间比较z值，子辈item的z值即使比其“大爷”要大，也会因为其父亲的z值比“大爷”小而被覆盖
+            
+                Rectangle {
+                      color: "#272822"
+                      width: 320
+                      height: 480
+
+                      Rectangle {
+                          id:r_1
+                          y: 64
+                          z: 1
+                          width: 256
+                          height: 256
+                          color: "green"
+                
+                          Rectangle {
+                              id:r_2
+                              x: 192
+                              y: 64
+                              z: 2000       //这里的2000要大于r_3的2，但是还是会被r_3盖上，因为r_1的z是1，要小于r_3的2
+                              width: 128
+                              height: 128
+                              color: "red"
+                          }
+                      }
+
+                      Rectangle {
+                          id:r_3
+                          x: 64
+                          y: 192
+                          z: 2
+                          width: 256
+                          height: 256
+                          color: "blue"
+                      }
+                  }
+            
+#3.3  -  渲染：见
+        Qt 5.6
+        Qt Quick
+        Qt Quick Scene Graph
+
+
+#4  -  用户输入
+        UI接收的输入有如下几种：
+                触摸
+                鼠标  
+                键盘
+                其他设备(传感器，加速器，摄像头...)             见QT5.6/QT SENSORS
+                    
+#5  -  布局
+       常用的布局：
+          x,y
+          anchors
+          row column grid Flow ...  见QT5.6/QT QUICK/ITEM POSITIONERS
+          layout rowlayout ... 见 QT5.6/QT QUICK LAYOUTS
+          Right-To-Left Support  见 QT5.6/QT QUICK/Right-to-left User Interfaces
+
+#6  -  状况，转换，动画
+
+#7  -  model，view，data storage
+
+#8  -  
+
+#9  -  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
