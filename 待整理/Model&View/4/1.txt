@@ -1,0 +1,6 @@
+//基本实现
+https://www.codeproject.com/Articles/632795/QML-TreeModel-and-TreeView
+
+
+//增加拖拽功能
+https://www.codeproject.com/Articles/664041/QML-QtQuick-TreeView-Model-Part-II
