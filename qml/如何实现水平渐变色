@@ -1,0 +1,66 @@
+    Rectangle{
+        id:bg_1
+        anchors.fill: parent
+        visible: false
+
+        LinearGradient{//渐变色背景
+            anchors.fill: parent
+            start: Qt.point(0, 0)
+            end: Qt.point(bg_1.width, 0)
+            gradient: Gradient {
+                GradientStop{position: 0.0 ; color: "#54d383"}
+                GradientStop{position: 1.0 ; color: "#5daefb"}
+            }
+        }
+    }
+
+使用LinearGradient实现水平渐变色，再将其作为子对象填充到需要的地方，这里是bg_1。
+
+LinearGradient的使用：
+
+1  -  start和end分别对应平面坐标系的某个点(qt quick的坐标系是相对坐标系，具体见../理论/QT QUICK的3.1节)
+2  -  gradient，创建一个渐变色
+3  -  source，用LinearGradient来修饰指定的对象，即”作为指定对象的底纹“
+
+注：这里有个问题，如果想实现一个有radius的Rectangle，无法通过如下代码达到目的：
+
+     Rectangle{
+        id:bg_1
+        anchors.fill: parent
+        radius:10
+
+        LinearGradient{//渐变色背景
+            anchors.fill: parent
+            start: Qt.point(0, 0)
+            end: Qt.point(bg_1.width, 0)
+            gradient: Gradient {
+                GradientStop{position: 0.0 ; color: "#54d383"}
+                GradientStop{position: 1.0 ; color: "#5daefb"}
+            }
+        }
+    }
+    或者
+    Rectangle{
+        id:bg_1
+        anchors.fill: parent
+        radius:10
+
+        LinearGradient{//渐变色背景
+            source:bg_1                 //这里不生效，不知道为什么
+            start: Qt.point(0, 0)
+            end: Qt.point(bg_1.width, 0)
+            gradient: Gradient {
+                GradientStop{position: 0.0 ; color: "#54d383"}
+                GradientStop{position: 1.0 ; color: "#5daefb"}
+            }
+        }
+    }
+如上代码，要么导致LinearGradient不显示，要么radius不生效。具体可以通过加”蒙版“的方式实现，具体操作见：   如何实现水平渐变色(续---如何加radius)
+
+
+
+
+
+
+
+

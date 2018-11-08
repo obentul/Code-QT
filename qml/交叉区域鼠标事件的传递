@@ -1,5 +1,7 @@
 //MouseArea的嵌套用法：MouseArea仅作用于自己的parent，如果propagateComposedEvents被设置为true，那么会把信号再向上一层传递，如果上一层的MouseArea也设置了，那么
-//继续向上一层传递
+//继续向上一层传递,注意propagateComposedEvents需要配合mouse.accept使用，当为false时会继续传递，当为true时会被截获而不再继续传递
+//PS:主要用在 ”交叉区域“ 的鼠标事件传
+//pps:鼠标事件有clicked pressed hovered等等，这些都要分别判断mouse.accept,分开设置，这样有的动作会被传递，有的不会被传递，方便分散控制
 
 
 import QtQuick 2.5
