@@ -1,0 +1,131 @@
+//Repeater : 创建N个对象后，自我销毁，把N个对象交由自己的父类
+//        可以理解为一筐材料，通过自我配置，然后启动制作，生成N个组件，自己消失，这N个组件也就是自己，这N个组件和自己原先的位置一样，被原先的父类管理
+
+
+//批量创建实例
+import QtQuick.Controls 1.2
+import QtQuick.Layouts 1.1
+import QtQuick 2.5
+import QtQuick.Window 2.2
+
+Window {
+    visible: true
+    width: 640
+    height: 480
+
+
+    Rectangle {
+        width: 400;
+        height: 200;
+        color: "#EEEEEE";
+
+        RowLayout {
+            anchors.fill: parent;
+            spacing: 4;
+            Repeater {
+                model: 8;   //实例化8个model，每个的格式都是下面这个Rectangle
+                Rectangle {
+                    width: 46;
+                    height: 30;
+                    color: "steelblue";
+                    Text {
+                        anchors.fill: parent;
+                        color: "black";
+                        font.pointSize: 14;
+                        verticalAlignment: Text.AlignVCenter;
+                        horizontalAlignment: Text.AlignHCenter;
+                        text: index;
+                    }
+                }
+            }
+        }
+    }
+
+ }
+
+
+//创建object
+import QtQuick.Controls 1.2
+import QtQuick.Layouts 1.1
+import QtQuick 2.5
+import QtQuick.Window 2.2
+
+Window {
+    visible: true
+    width: 640
+    height: 480
+
+
+    Rectangle {
+        width: 320;
+        height: 200;
+        color: "#EEEEEE";
+
+        Column {
+            anchors.fill: parent;
+            anchors.margins: 4;
+            spacing: 4;
+            Repeater {
+                //当需要被实例化的对象不是单对象，而是复合对象时，使用如列表中的数据去实例化
+                model: [
+                    {"name":"Zhang San", "mobile":"13888888888"},
+                    {"name":"Wang Er", "mobile":"13999999999"},
+                    {"name":"Liu Wu", "mobile":"15866666666"},
+                ]
+                Row {
+                    height: 30;
+                    Text{
+                        width: 100;
+                        color: "blue";
+                        font.pointSize: 13;
+                        font.bold: true;
+                        verticalAlignment: Text.AlignVCenter;
+                        text: modelData.name;
+                    }
+                    Text{
+                        width: 200;
+                        font.pointSize: 13;
+                        verticalAlignment: Text.AlignVCenter;
+                        text: modelData.mobile;
+                    }
+                }
+            }
+        }
+    }
+ }
+
+
+//创建字符串
+import QtQuick.Controls 1.2
+import QtQuick.Layouts 1.1
+import QtQuick 2.5
+import QtQuick.Window 2.2
+
+Window {
+    visible: true
+    width: 640
+    height: 480
+
+
+    Rectangle {
+        width: 300;
+        height: 200;
+        color: "#EEEEEE";
+
+        Row {
+            anchors.centerIn: parent;
+            spacing: 8;
+            Repeater {
+                model: ["Hello", "Qt", "Quick"];    //使用列表中的值来实例化紧接着的Text
+                Text {
+                    color: "blue";
+                    font.pointSize: 18;
+                    font.bold: true;
+                    verticalAlignment: Text.AlignVCenter;
+                    horizontalAlignment: Text.AlignHCenter;
+                    text: modelData;
+                }
+            }
+        }
+    }
+ }

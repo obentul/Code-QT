@@ -12,27 +12,11 @@ Window {
     height: 480
     title: qsTr("Hello World")
 
-    Component{              //(!!!)这里定义了，但是是不显示的，如果想显示必须实例化，如果想实例化，必须使用Loader
-        id:c1;
-        Rectangle{
-            id:r1
-            height: 100
-            width: 100
-            color:"red"
-            z:10            //这里z不生效，因为Rectangle是Component的子类，是寄生在Component中的，因此会被覆盖
-
-            Button{
-                id:b1
-                text:"xx"
-            }
-        }
-    }
-
     Loader{
         id:c1Loader
         visible: true
         z:10                //Loader指向Component，item指向Rectangle，所以应当在Loader中设置z，而不是在item中
-        sourceComponent: c1;
+        source: "./使用Loader加载URL(sourceComponent.qml)";         //指向要加载的qml文件
         onLoaded: {
             item.color="blue";  //修改后，发现生效
         }
