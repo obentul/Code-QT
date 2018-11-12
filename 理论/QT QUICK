@@ -109,13 +109,72 @@
           layout rowlayout ... 见 QT5.6/QT QUICK LAYOUTS
           Right-To-Left Support  见 QT5.6/QT QUICK/Right-to-left User Interfaces
 
-#6  -  状况，转换，动画
+#6  -  组态(state)
+       所有的继承自Item的QML组件都有state属性，用来定义一套动作，可以理解为宏，即当前组件切换到相应的state后，会触发state中的change下的所有动
+
+        state在组件中是一个列表，所以其定义一般如下
+
+        Rectangle
+        {
+            id:r_1
+            states:[                            //定义组态列表，以供使用，注意这里相当于定义一系列模板
+                State{
+                    name:"state_1"
+                    changes:[
+                        PropertyChanges{target:r_2;color:"green"}   //当r_1切换至state_1组态时，触发此change，导致r_2的color变为green
+                        PropertyChanges{target:r_2;state:"state_2"}     //当r_1切换至state_1组态时，触发此change，导致r_2的状态切换至state_1
+                    ]
+                }
+                State{
+                    name:"state_2"
+                    changes:[
+                        PropertyChanges{target:r_1;state:"state_1"}     //当r_1切换至state_2组态时，让r_1切换至组态state_1
+                    ]
+                }
+
+            ]
+            state:state_1                       //定义当前Rectangle的state初始值，这个值要么是默认值，要么一定是states中的某一个name
+        }
+
+        Rectangel{
+            id:r_2
+            states:[
+                State{
+                    name:"state_1"
+                    changes:[
+                        PropertyChanges{target:r_1;state:"state_2"}     //当r_2切换至state_1组态时，让r_1切换至组态state_2
+                    }
+                }
+            ]
+
+        }
+
+       （*） 疑问：这样互相切换还能互相设置state，及其有可能形成 “死循环” ，这个问题怎么解决的？
+
+        state还有一个when属性，用来定义一个触发条件。当达到条件是，此state被触发，进而执行changes
+
+        小结：至此，state的切换有两种方式：1）显式赋值，因为state相当于Item的一个property，所以只要是可以给属性赋值的地方，都可以给state赋值
+                                            2）隐式触发，这个有点类似于注册信号，当满足什么条件，会进入这个state
+        （*）注意：state是属性，states是属性集合
+                state作为属性，某一个时刻只可能有一个值
+                states是state可选择的所有模板，相当于定义了一个枚举类型，然后让state从里面选一个
+
+
+
+        state必须与changes结合起来使用才有意义，而对于一个Item，其change有如下几种：(这些change都可以作为changes的成员)
+            1）PropertyChange
+            2）ParentChange
+            3）AnchorChanges
+            4）StateChangeScript
+        具体的使用，见帮助文档
+
+#7  -  转换，动画
 
 #7  -  model，view，data storage
 
-#8  -  
+#8  -
 
-#9  -  
+#9  -
 
 
 
