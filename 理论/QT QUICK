@@ -159,8 +159,6 @@
                 state作为属性，某一个时刻只可能有一个值
                 states是state可选择的所有模板，相当于定义了一个枚举类型，然后让state从里面选一个
 
-
-
         state必须与changes结合起来使用才有意义，而对于一个Item，其change有如下几种：(这些change都可以作为changes的成员)
             1）PropertyChange
             2）ParentChange
@@ -168,13 +166,89 @@
             4）StateChangeScript
         具体的使用，见帮助文档
 
-#7  -  转换，动画
+#7  -  转换
+	state完成的是突变，即一个组态瞬间变成另一个组态，没有过渡
 
-#7  -  model，view，data storage
+	transition就完成了组态之间变化的“渐变”
 
-#8  -
+	例子:
+		  Rectangle {
+		      width: 75; height: 75
+		      id: button
+		      state: "RELEASED"
 
-#9  -
+		      MouseArea {
+		          anchors.fill: parent
+		          onPressed: button.state = "PRESSED"
+		          onReleased: button.state = "RELEASED"
+		      }
+	
+		      states: [
+		          State {
+		              name: "PRESSED"
+		              PropertyChanges { target: button; color: "lightblue"}
+		          },
+		          State {
+		              name: "RELEASED"
+		              PropertyChanges { target: button; color: "lightsteelblue"}
+		          }
+		      ]
+
+		      transitions: [
+		          Transition {
+		              from: "PRESSED"
+		              to: "RELEASED"
+		              ColorAnimation { target: button; duration: 100}
+		          },
+		          Transition {
+		              from: "RELEASED"
+		              to: "PRESSED"
+		              ColorAnimation { target: button; duration: 100}
+		          }
+		      ]
+		  }
+
+	注：transition需要依赖state属性
+
+#8  -  动画
+	Animation是QT中所有动画的基类
+	具体见帮助文档
+
+	state、transition和animation  是主要用来实现动画效果。也可以用来实现快照效果。
+	
+
+#9  -  model，view，data storage
+	ListView的属性，只能被ListView中的delegate修改。源码中是通过ListView中的View属性就定义了一个ListView的列表样式，而操作者只能是delegate。
+	同上，ListView.view.model属性是在ListView.view中的，理所应当可以被delegate处理
+
+#10  -  repeater
+	实例化某个model中的数据
+	和ListView一样，reperter也有model和delegate属性，delegate表示实例化出来的每条的样式，model存放数据
+	（*）一般情况下，reperter都和row和column一起使用，从而方便安排实例化出来的各个组件
+	
+	reperter不适合用来实例化大数据量，比如model中的数据很多，这个时候要考虑使用ListView和scroll的结合，实现“按需加载”
+
+	注意：reperter只能实例化继承自Item的组件，而不是QObject的组件，也就是说reperter的delegate属性，只能指向继承自Item的组件
+
+	model可以是如下几种：
+		1）一个整数，表示要创建多少个delegate
+		2）任意一种model，比如ListModel，只要继承自QAbstractItemModel 即可
+		3）一个字符串列表
+		4）一个Object列表
+
+	reperter有两个信号，分别表示有数据加入和有数据移除：itemAdded(int index, Item item)
+							    itemRemoved(int index, Item item)
+		信号自动发送，可以使用onItemAdded和onItemRemoved接收处理
+
+
+#11  -  C++ Data Models
+	
+
+
+#12  -  Particles And Graphical Effects
+
+
+#13  -  Convenience Types
 
 
 
