@@ -1,0 +1,26 @@
+
+
+void MDCCommand::setActivePage(AnchorType tabType)
+{
+    switch(tabType)
+    {
+    case AnchorMap:
+        emit activeTabPageChanged(mapPageItem);
+        //mapPageItem->window()->raise();                           //只能短暂置顶，需要了解详细实现，这里不使用
+        mapPageItem->window()->setFlags(Qt::WindowStaysOnTopHint);  //置顶桌面
+        break;
+    case AnchorVideo:
+        emit activeTabPageChanged(videoPageItem);
+        videoPageItem->window()->setFlags(Qt::WindowStaysOnTopHint);
+        break;
+    case AnchorDispatch:
+        emit activeTabPageChanged(dispatchPageItem);
+        break;
+    case AnchorMonitor:
+        emit activeTabPageChanged(monitorPageItem);
+        break;
+    }
+}
+
+这里mapPageItem是QQuickItem指针，进入QQuickItem可以发现其有window方法，返回的是QQuickItem属于的那个QQuickWindow指针，在
+QQuickWindow中又有setFlags方法，用来设置当前窗口的一些状态，具体见源码
