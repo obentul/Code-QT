@@ -249,7 +249,12 @@
 
 
 #13  -  Convenience Types
+        动态对象实例化：QT提供 Loader, Repeater, ListView, GridView and PathView 来完成动态对象实例化(这些组件都有model和delegate)
+            动态对象实例化可能会影响性能，在performance guide章节中有优化方法
 
+        动态属性绑定：就是常用的属性依赖，初始化指定依赖关系，然后一个变动都会引起其他的变动
+
+       
 
 
 
