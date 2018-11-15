@@ -1,0 +1,1700 @@
+import QtQuick 2.2
+import QtQml.Models 2.1
+import QtQuick.Controls 1.4
+import QtQuick.Controls.Styles 1.4
+import QtQuick.Dialogs 1.2
+import QtMultimedia 5.6
+import utility 1.0
+import addrCommand 1.0
+import chatmessage 1.0
+import QtGraphicalEffects 1.0
+import "../"
+import "../widgets"
+import "../panels"
+import "../pages"
+import "../apis"
+
+//聊天页面
+
+Rectangle {
+    id:chatPageRoot
+    radius: 10
+    anchors.fill: parent
+    property bool is_active:chatPageRoot.focus
+    property int bg_z:chatPageRoot.z+1
+
+
+    onFocusChanged: {
+        is_active = focus
+    }
+    onIs_activeChanged: {
+
+    }
+
+    Rectangle{
+        id:bg_1
+        anchors.fill: parent
+        //radius:10
+        border.color: "red"
+        //visible: is_active?true:false
+        visible: false
+
+        LinearGradient{//渐变色背景
+            anchors.fill: parent
+            start: Qt.point(0, 0)
+            end: Qt.point(bg_1.width, 0)
+            gradient: Gradient {
+                GradientStop{position: 0.0 ; color: "#54d383"}
+                GradientStop{position: 1.0 ; color: "#5daefb"}
+            }
+        }
+    }
+
+    OpacityMask {
+        anchors.fill: bg_1
+        source: bg_1
+        maskSource: Rectangle {
+            width: bg_1.width
+            height: bg_1.height
+            radius: 10
+        }
+        visible: is_active?true:false
+    }
+
+    Rectangle{//全灰背景
+        id:bg_2
+        anchors.fill: parent
+        radius:10
+        z:bg_z
+        color:"#D0D9E2"
+        visible: is_active?false:true
+    }
+
+    property string myuid:""
+    property string myName:""
+    property bool is_chatpanelvisible:true
+    property bool isUsed:false
+    property bool bwheel: true
+    property bool isHistoryMsg: false
+    property bool f_sending:false
+    property bool f_send_timeout:false
+    property bool f_resend:false
+    property string messagestatus:"init"
+
+    function indexofListElement_seq(sequence_no){
+        console.log("indexofListElement_seq")
+        for(var i=0,len=mymodel.count;i<len;i++)
+        {
+            var tmp = mymodel.get(i).sequence_no
+            if(tmp===sequence_no)
+            {
+                console.log("match index: "+i)
+                return i;
+            }
+            else
+            {
+                console.log("curr: "+tmp)
+                continue;
+            }
+        }
+        console.log("no match indexofListElement_seq")
+    }
+    function indexofListElement_callid(callid){
+        console.log("indexofListElement_callid")
+        for(var i=0,len=mymodel.count;i<len;i++)
+        {
+            var tmp = mymodel.get(i).callid
+            if(tmp===callid)
+            {
+                console.log("match index: "+i)
+                return i;
+            }
+            else
+            {
+                console.log("curr: "+tmp)
+                continue;
+            }
+        }
+        console.log("no match indexofListElement_callid")
+    }
+
+
+    onVisibleChanged: {
+        if (chatPageRoot.visible)
+        {
+            scroll_list.contentAtEnd()//将内容拉到最后
+        }
+    }
+
+    MouseArea{
+        anchors.fill: parent
+        onPressed:{
+             mouse.accepted = true
+        }
+        onClicked: {
+            input.focus = true
+        }
+    }
+
+    Connections{
+        target: myMMediaCommand//记录自己各种信息的类对象
+        onNewMessage:{
+            if(fromUid==myuid){
+                var data = {
+                    "mode": "left",//要判断发送者是不是自己（这条消息是发送的还是接收的）
+                    "message_info": info,
+                    "sender_name": info.senderName,
+                    "time":time
+                }
+                chatPageRoot.isHistoryMsg = false;
+                mymodel.append(data)
+             }
+        }
+
+        onAddMyMessage:{
+            if(toUid==myuid){
+                var data = {
+                    "mode": "right",//要判断发送者是不是自己（这条消息是发送的还是接收的）
+                    "message_info": info,//消息内容
+                    "sender_name": "",
+                    "time":time,
+                }
+                chatPageRoot.isHistoryMsg = false;
+                mymodel.append(data)
+            }
+        }
+
+        onHistroyMessage:{
+            if(fromUid==myuid){
+                var data = {
+                    "mode": info.senderType == ChatMessageInfo.Receive?"left":"right",
+                    "message_info": info,
+                    "sender_name": info.senderName,
+                    "time":time,
+                    "status":info.messageStatus
+                }
+                console.log("onHistroyMessage")
+                console.log("status: "+info.messageStatus)
+                console.log("status: "+data.status)
+                console.log("onHistroyMessage")
+
+                if (isInit)
+                {
+                    timeInit.stop();
+                    timeInit.start();
+                }
+
+                chatPageRoot.isHistoryMsg = true;
+                mymodel.insert(0, data)
+            }
+        }
+    }
+
+    Text{//当前参与聊天的终端和群组号
+        id:nameTitle
+        anchors.top:parent.top
+        anchors.topMargin:9.5
+        anchors.left: parent.left
+        anchors.leftMargin: 23
+        font.pixelSize: 13
+        font.family: myMDCCommand.Language?"微软雅黑":"Arial"
+        font.bold: true
+        color: is_active?"#FFFFFF":"#141C29"
+        z:bg_z+1
+        text: myName
+    }
+
+    Button{//close button
+        id:btn_close
+        width: 30
+        height: 30
+        anchors.right: parent.right
+        anchors.rightMargin: 17
+        anchors.verticalCenter:nameTitle.verticalCenter
+
+        z:bg_z+1
+
+        style: ButtonStyle{
+            background: Item{
+                anchors.fill: parent
+                Image{
+                    source:(control.hovered || control.pressed)?"qrc:/images/sms/popup_button_close_hover.png":"qrc:/images/sms/popup_button_close_normal.png"
+                }
+            }
+        }
+
+        onClicked: {
+            myMMediaCommand.appendVaccantItems(chatPageRoot.parent.objectName);
+            chatPageRoot.visible=false;
+            myMMediaCommand.removefromCurChatPage(myuid);
+        }
+    }
+
+    Rectangle{//聊天窗口包裹
+        id:chatpage
+        anchors.left: parent.left
+        anchors.leftMargin: 2
+        anchors.right: parent.right
+        anchors.rightMargin: 2
+        anchors.top:parent.top
+        anchors.topMargin: 32
+        anchors.bottom:tools.top
+        color: "#F0F3F4"
+        z:bg_z+1
+
+        MyScrollView{//滚动样式
+                id: scroll_list
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.right: parent.right
+                anchors.rightMargin: 5
+                bgColor:"#000000"
+                selColor: "#0779d0"
+                normalColor: "#57abeb"
+
+                function contentAtEnd(){
+                    var flickableItem = scroll_list.flickableItem
+                    var temp = flickableItem.contentHeight-scroll_list.height
+                    if (temp > 0)
+                    {
+                        flickableItem.contentY = temp
+                    }
+                }
+
+                function contentAtEndaddMsg(height){
+                    var flickableItem = scroll_list.flickableItem
+                    var temp = flickableItem.contentHeight-scroll_list.height + height
+                    if (temp > 0)
+                    {
+                        flickableItem.contentY = temp
+                    }
+                }
+
+                function isContentEnd(){
+                    var flickableItem = scroll_list.flickableItem
+                    return flickableItem.contentY > flickableItem.contentHeight-scroll_list.height-5
+                }
+
+                function isContentBegin(){
+                    var flickableItem = scroll_list.flickableItem
+                    return flickableItem.contentY < 5
+                }
+
+                Item{
+                    id: listitem
+                    height: list.contentHeight+10
+                    width: scroll_list.width
+                    implicitHeight: height
+                    implicitWidth: width
+
+                    AnimatedImage{//加载历史记录转圈
+                        id:waitGif
+                        anchors.top: parent.top
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        width:20
+                        height:20
+                        paused: chatPageRoot.bwheel
+                        visible: !chatPageRoot.bwheel
+                        source: "/images/window/waitting.gif"
+                        z:200
+                    }
+
+                    ListView{//聊天记录视图
+                        id: list
+                        anchors.fill: parent
+                        spacing: 0
+                        property int old_contentHeight: 0
+                        model: ListModel{
+                            id: mymodel
+                        }
+                        delegate: msgListDelegate
+                        interactive: false
+
+                        MouseArea {
+                            anchors.fill: parent
+                            propagateComposedEvents: true   //对ListView的鼠标动作会向上传递给listItem，貌似没什么用
+                            onWheel: {//滚轮
+                                var temp = scroll_list.isContentBegin()
+                                if (temp && wheel.angleDelta.y > 0)
+                                {
+                                    timeOutWheel.running = true;
+                                    if (chatPageRoot.bwheel)
+                                    {
+                                        chatPageRoot.bwheel = false;
+                                        myMMediaCommand.addMsgFromDB(myuid)
+
+                                    }
+                                }
+                               wheel.accepted = false;
+                            }
+
+                            onClicked: {
+                                mouse.accepted = false;
+                            }
+
+                            onPositionChanged: {
+                                mouse.accepted = false;
+                            }
+
+                            onDoubleClicked: {
+                                mouse.accepted = false;
+                            }
+
+                            onPressAndHold: {
+                                mouse.accepted = false;
+                            }
+
+                            onPressed: {
+                                mouse.accepted = false;
+                            }
+
+                            onReleased: {
+                                mouse.accepted = false;
+                            }
+                        }
+                    }
+                }
+            }
+
+    }
+
+    Rectangle{//工具栏：发图片 发文件 白板
+        id:tools
+        height:37
+        anchors.left: parent.left
+        anchors.leftMargin: 2
+        anchors.right: parent.right
+        anchors.rightMargin: 2
+        anchors.bottom: locate_input.top
+
+        color: "#D0D9E2"
+        z:bg_z+1
+
+        Row {
+            id: row
+            anchors.left: parent.left
+            anchors.leftMargin: 20
+            anchors.top: parent.top
+            height: 37
+            spacing: 14
+
+            Button {//发送图片
+                id: imageBtn
+                width: 40
+                height: 37
+                tooltip: myMDCCommand.Language?"图片":"image"
+
+                style: ButtonStyle{
+                    background: Item{
+                        anchors.fill:parent
+                        Image{
+                            source:(control.hovered||control.pressed)?"/images/sms/sms_button_photo_press.png":"/images/sms/sms_button_photo_normal.png"
+                        }
+                    }
+                }
+
+                onClicked: {
+                    if (myuid == "")
+                    {
+                        myMDCCommand.showWarningInfo(myMDCCommand.Language?"请从组织树中选择发送对象！":"Please select the sending object from the organization tree!");
+                        return;
+                    }
+                    imageDialog.open();
+                }
+            }
+
+            Button {//发送视频
+                id: videoBtn
+                width: 40
+                height: 37
+                tooltip: myMDCCommand.Language?"视频":"file"
+
+                style: ButtonStyle{
+                    background: Item{
+                        anchors.fill: parent
+                        Image{
+                            source:(control.hovered||control.pressed)?"/images/sms/sms_button_video_press.png":"/images/sms/sms_button_video_normal.png"
+                        }
+                    }
+                }
+
+                onClicked: {
+                    if (myuid == "")
+                    {
+                        myMDCCommand.showWarningInfo(myMDCCommand.Language?"请从组织树中选择发送对象！":"Please select the sending object from the organization tree!");
+                        return;
+                    }
+                    videoDialog.open();
+                }
+            }
+
+            Button {//发送文件
+                id: fileBtn
+                width: 40
+                height: 37
+                tooltip: myMDCCommand.Language?"文件":"file"
+
+                style: ButtonStyle{
+                    background: Item{
+                        anchors.fill: parent
+                        Image{
+                            source:(control.hovered||control.pressed)?"/images/sms/sms_button_folder_press.png":"/images/sms/sms_button_folder_normal.png"
+                        }
+                    }
+                }
+
+                onClicked: {
+                    if (myuid == "")
+                    {
+                        myMDCCommand.showWarningInfo(myMDCCommand.Language?"请从组织树中选择发送对象！":"Please select the sending object from the organization tree!");
+                        return;
+                    }
+                    fileDialog.open();
+                }
+            }
+        }
+    }
+
+    Rectangle{//输入wrapper
+        id:locate_input
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 2
+        anchors.left:parent.left
+        anchors.leftMargin: 2
+        anchors.right: parent.right
+        anchors.rightMargin: 2
+        height: parent.height/5
+        color:"#F0F3F4"
+        radius: 10
+        z:bg_z+1
+
+        Rectangle{//输入框
+            id:wrapper_input
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+            anchors.right:btn_snd.left
+            anchors.rightMargin: 10
+            anchors.top:parent.top
+            anchors.topMargin: 10
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 10
+            color:parent.color
+
+            TextArea {
+                id:input
+                anchors.fill: parent
+                clip:true
+                selectByMouse: true
+                menu:null
+                objectName: "input"
+
+                wrapMode: TextEdit.Wrap
+                property int maxLength: 512//最大输入长度
+                text: myMDCCommand.Language?"请输入消息内容(最长512字符)":"Please enter the message content(up to 512 characters)"
+
+                font.pixelSize: 14
+                font.family: myMDCCommand.Language?"微软雅黑":"Arial"
+                textColor:activeFocus?"#24344e":"#557392"
+
+                Keys.onPressed: {
+                    console.log("Keys.onPressed")
+                    if (event.key == Qt.Key_Enter || event.key == Qt.Key_Return)
+                    {
+                        if (myuid == "")
+                        {
+                            myMDCCommand.showWarningInfo(myMDCCommand.Language?"请从组织树中选择发送对象！":"Please select the sending object from the organization tree!");
+                            return;
+                        }
+
+                        var senddata = input.text
+
+                        if (senddata === "" || senddata === "请输入消息内容(最长512字符)" || senddata === "Please enter the message content(up to 512 characters)")
+                        {
+                            myMDCCommand.showWarningInfo(myMDCCommand.Language?"请输入发送内容！":"please input content to be sent");
+                            input.text = "";
+                            event.accepted = true;
+                            return;
+                        }
+
+                        myMMediaCommand.sendmessage(myuid, senddata);
+                        input.text = "";
+                    }
+                }
+
+                onActiveFocusChanged: {
+                    if (activeFocus)
+                    {
+                        is_active=true
+                        if ((text == "请输入消息内容(最长512字符)") || (text =="Please enter the message content(up to 512 characters)"))
+                        {
+                            text = ""
+                        }
+                    }
+                    else
+                    {
+                        is_active=false
+                        if (text === "")
+                        {
+                            text = myMDCCommand.Language?"请输入消息内容(最长512字符)":"Please enter the message content(up to 512 characters)"
+                        }
+                    }
+                }
+
+                onTextChanged:
+                {
+                    var i,sum;
+                    sum=0;
+                    var strTemp = input.text;
+                    for(i=0;i<strTemp.length;i++){
+                        if ((strTemp.charCodeAt(i)>=0) && (strTemp.charCodeAt(i)<=255)){
+                            sum=sum+1;
+                        }else{
+                            sum=sum+2;
+                        }
+                        if (sum > maxLength)
+                        {
+                            break;
+                        }
+                    }
+
+                    if (sum > maxLength)
+                    {
+                        var prePosition = cursorPosition;
+                        input.text = input.text.substring(0, i);
+                        cursorPosition = Math.min(prePosition, i);
+                        myMDCCommand.showWarningInfo(myMDCCommand.Language?"最大输入512个字符":"Limit 512 characters");
+                    }
+                }
+            }
+        }
+
+        Rectangle{//发送按键
+            id:btn_snd
+            anchors.right: parent.right
+            anchors.rightMargin: 21
+            anchors.verticalCenter: parent.verticalCenter
+            width: 37*2
+            height: 37
+            radius: 10
+            color:"#D0D9E2"
+
+            Text{
+                text:myMDCCommand.Language?"发送":"send"
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
+                z:bg_snd.z+1
+                color: is_active?"#FFFFFF":"#141C29"
+            }
+            Image{
+                id:bg_snd
+                anchors.fill: parent
+                source:"qrc:/images/sms/sms_button_send_press.png"
+                visible: is_active?true:false
+            }
+            MouseArea{
+                id:ma_snd
+                anchors.fill: parent
+                onClicked: {
+                    if (myuid == "")
+                    {
+                        myMDCCommand.showWarningInfo(myMDCCommand.Language?"请从组织树中选择发送对象！":"Please select the sending object from the organization tree!");
+                        return;
+                    }
+
+                    var senddata = input.text
+
+                    if (senddata === "" || senddata === "请输入消息内容(最长512字符)" || senddata === "Please enter the message content(up to 512 characters)")
+                    {
+                        myMDCCommand.showWarningInfo(myMDCCommand.Language?"请输入发送内容！":"please input content to be sent");
+                        input.text = "";
+                        return;
+                    }
+
+                    myMMediaCommand.sendmessage(myuid, senddata);
+                    input.text = "";
+                }
+            }
+        }
+    }
+
+    Rectangle{//去圆角
+        id:reclize
+        anchors.top:locate_input.top
+        anchors.right: locate_input.right
+        anchors.left: locate_input.left
+        height: 10
+        z:locate_input.z+1
+        color: locate_input.color
+    }
+
+    Timer {
+        id:timeInit
+        interval: 1000
+        running: false
+        repeat: false
+        onTriggered: scroll_list.contentAtEnd()//将内容拉到最后
+    }
+
+    Timer {
+        id:timeOutWheel
+        interval: 500
+        running: false
+        repeat: false
+        onTriggered: bwheel = true;
+    }
+
+    FileDialog {//传输图片
+        id: imageDialog;
+        title: "Please choose an Image File";
+        nameFilters: ["Image Files (*.jpg *.png *.gif *.bmp *.jpeg *.pic)"];
+        folder: "file:///C://"
+        onAccepted: {
+            var url = imageDialog.fileUrl;
+            var decodeUrl = decodeURIComponent(url);
+            myMMediaCommand.sendImage(myuid, decodeUrl)
+        }
+    }
+
+    FileDialog {//传输视频
+        id: videoDialog;
+        title: "Please choose an Video File";
+        nameFilters: ["Video Files (*.mp4 *.avi *.wmv *.flv *.3gp *.mpg)"];
+        folder: "file:///C://"
+        onAccepted: {
+            var url = videoDialog.fileUrl;
+            var decodeUrl = decodeURIComponent(url);
+            myMMediaCommand.sendFile(myuid, decodeUrl)
+        }
+    }
+
+    FileDialog {//传输文件
+        id: fileDialog;
+        title: "Please choose a File";
+        nameFilters: ["All Files (*.* )"];
+        folder: "file:///C://"
+        onAccepted: {
+            var url = fileDialog.fileUrl;
+            var decodeUrl = decodeURIComponent(url);
+            myMMediaCommand.sendFile(myuid, decodeUrl)
+        }
+    }
+
+    Component{//菜单风格
+        id:memuStyle
+        MenuStyle{
+            frame:Rectangle//整个菜单背景
+            {
+                radius:4
+                color:"#e4e8eb"
+            }
+
+            itemDelegate.label:Text {//菜单条目内容
+                anchors.left: parent.left
+               // anchors.leftMargin: 10
+                width:100
+                height:28
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignLeft
+                font.pixelSize: 14
+                //font.capitalization: Font.SmallCaps
+                color: "#24344e"
+                text: styleData.text
+            }
+
+            itemDelegate.background:Rectangle{//菜单条目背景
+                color:styleData.selected?"#bbddf6":"#e4e8eb"
+            }
+        }
+    }
+
+    Component{//每一条聊天记录的风格
+        id:msgListDelegate
+        Item{
+            id: root
+            width: chatpage.width
+           // height: mode=="left"?(backgound.height + 24 + timerect.height):(backgound.height + timerect.height)
+            height: backgound.height + nametext.height + 8
+            property ChatMessageInfo messageInfo: message_info
+            property string sendername: sender_name
+            property real progress: messageInfo.chunck * 1024*1024
+            property real maxvalue: messageInfo.byteTotal
+            property int percent: 0
+
+            function stopBtn(){
+                audioloader.sourceComponent =null
+                audioImg.paused = true;
+                audioplayBtn.visible = true;
+            }
+
+            function stopViewer(){
+                videoloader.sourceComponent = null;
+                playBtn.visible =true;
+            }
+
+            function stopGif(){
+                gifloader.sourceComponent = null;
+                gifplayBtn.visible = true;
+            }
+
+            onHeightChanged:{
+                if (!chatPageRoot.isHistoryMsg)
+                {
+                    scroll_list.contentAtEndaddMsg(height);
+                }
+            }
+
+            Component.onCompleted: {
+                console.log("msgListDelegate Component.onCompleted")
+                if (root.messageInfo.fileStatus == ChatMessageInfo.STATUS_UPLOAD_PENDING)
+                {
+                    root.messageInfo.startUpload(root, chatPageRoot.myuid);
+                    return;
+                }
+                if ((root.messageInfo.type == ChatMessageInfo.Image ||root.messageInfo.type == ChatMessageInfo.Audio)&& root.messageInfo.fileStatus == ChatMessageInfo.STATUS_DOWNLOADING)
+                {
+                    root.messageInfo.setListItem(root);
+                    //root.messageInfo.startDownload(root);
+                }
+                root.messageInfo.fileStatusChanged(root.messageInfo.fileStatus);
+            }
+
+            function setValue(value)
+            {
+                root.progress = value;
+                root.percent = (value*100)/root.maxvalue
+            }
+
+            function setMaxValue(value)
+            {
+                root.maxvalue = value;
+            }
+
+            function getImagesource(){
+                if (root.messageInfo.type == ChatMessageInfo.Image)
+                {
+                    if (root.messageInfo.fileStatus == ChatMessageInfo.STATUS_DOWNLOAD_FAILED ||
+                            root.messageInfo.fileStatus == ChatMessageInfo.STATUS_UPLOAD_FAILED)
+                    {
+                        return "/images/multimedia/message_fail_pic.png"
+                    }
+                    if (mode == "left" && root.messageInfo.fileStatus != ChatMessageInfo.STATUS_DOWNLOAD_SUCCESS)
+                    {
+                        return root.messageInfo.url
+                    }else {
+                        return "file:///" + encodeURIComponent(root.messageInfo.filename)
+                    }
+                }else if (root.messageInfo.type == ChatMessageInfo.Video)
+                {
+                    if (root.messageInfo.fileStatus == ChatMessageInfo.STATUS_DOWNLOAD_FAILED ||
+                            root.messageInfo.fileStatus == ChatMessageInfo.STATUS_UPLOAD_FAILED)
+                    {
+                        return "/images/multimedia/message_fail_vid.png"
+                    }
+
+                    if (mode == "left" || root.messageInfo.fileStatus == ChatMessageInfo.STATUS_UPLOAD_SUCCESS)
+                    {
+                        var url = root.messageInfo.url
+                        if (url == "")
+                        {
+                            return ""
+                        }
+                        return url.substring(0,url.lastIndexOf(".")) + ".jpg"
+                    }
+                }
+
+                return ""
+            }
+
+
+            Rectangle {//消息时间
+                id:timerect
+                x: mode=="left"?28+nametext.contentWidth:(root.width-width-22)
+                color: "transparent"
+                anchors.verticalCenter: nametext.verticalCenter
+                width: msgtime.width
+                height: msgtime.height
+
+                Text {
+                    id: msgtime
+                    anchors.centerIn: timerect
+                    font.pixelSize: 10
+                    font.family: myMDCCommand.Language?"微软雅黑":"Arial"
+                    color: "#919aa6"
+                    text:time
+                }
+            }
+
+            Text {//发送者name，只有左侧消息显示
+                id:nametext
+                visible: mode=="left"?true:false
+                text:sendername
+                anchors.top: parent.top
+                anchors.topMargin: 8
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                color: "#37444e"
+                font.pixelSize: 14
+                font.family: myMDCCommand.Language?"微软雅黑":"Arial"
+                width: 190
+                verticalAlignment: Text.AlignVCenter
+                height: 20
+                elide: Text.ElideRight
+            }
+
+            Rectangle {//长条形消息框的底纹
+                id: backgound
+                x: mode=="left"?10:(root.width-width-22)
+                anchors.top: nametext.bottom
+                height: root.messageInfo.type == ChatMessageInfo.Text?mytext.height+16:(root.messageInfo.type == ChatMessageInfo.File?((filetext.height<36?36:filetext.height) + 16):(root.messageInfo.type == ChatMessageInfo.Location?200:(picImage.height+16)))
+                width: root.messageInfo.type == ChatMessageInfo.Text?mytext.width+16:(root.messageInfo.type == ChatMessageInfo.File?180:(root.messageInfo.type == ChatMessageInfo.Location?200:(picImage.width + 16)))
+                border.color: mode=="left"?"#e6ebf0":"#44bbdb"
+                border.width: 1
+                clip: true
+                radius: 8
+
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: mode=="left"?(root.messageInfo.type == ChatMessageInfo.File?"#E7ECF1":"#ffffff"):"#57cbf6" }
+                    GradientStop { position: 1.0; color: mode=="left"?(root.messageInfo.type == ChatMessageInfo.File?"#E7ECF1":"#ffffff"):"#60bbff" }
+
+                }
+
+                Rectangle {
+                    width: 10
+                    height: 10
+                    x:mode=="left"?0:(backgound.width-10)
+                    anchors.bottom: parent.bottom
+                    border.color: mode=="left"?"#e6ebf0":"#44bbdb"
+                    border.width: 1
+                    color: mode == "left"?(root.messageInfo.type == ChatMessageInfo.File?"#E7ECF1":"#ffffff"):"#60bbff"
+                }
+
+                Rectangle {
+                    width: 10
+                    height: 10
+                    x:mode=="left"?1:(backgound.width-11)
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 1
+                    color: mode == "left"?(root.messageInfo.type == ChatMessageInfo.File?"#E7ECF1":"#ffffff"):"#60bbff"
+                }
+            }
+
+            Item {
+                id : comItem
+                anchors.fill: backgound
+                Image {
+                    id: fileImage
+                    anchors.left: parent.left
+                    anchors.leftMargin: 8
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: root.messageInfo.type == ChatMessageInfo.File
+                    source: (root.messageInfo.fileStatus == ChatMessageInfo.STATUS_DOWNLOAD_FAILED ||
+                            root.messageInfo.fileStatus == ChatMessageInfo.STATUS_UPLOAD_FAILED)?"/images/multimedia/message_fail_file_s.png":"/images/multimedia/message_talkbg_send_doc.png"
+                    MouseArea{
+                        anchors.fill:parent
+                        onClicked: {
+                            //var path = myMDCCommand.localPath+"/mmDownload/";
+                            var path = root.messageInfo.filename.substring(0,root.messageInfo.filename.lastIndexOf("/"))
+                            console.log(root.messageInfo.url)
+                            myMMediaCommand.openDirectory(root.messageInfo.filename.substring(0,root.messageInfo.filename.lastIndexOf("/")));
+                        }
+                    }
+                }
+
+                TextEdit{//文字样式
+                    id: mytext
+                    anchors.centerIn: parent
+                    readOnly: true
+                    selectByMouse :true
+                    wrapMode: TextEdit.Wrap
+                    text: root.messageInfo.contentData
+                    color: "#37444e"
+                    font.pixelSize: 14
+                    font.family: myMDCCommand.Language?"微软雅黑":"Arial"
+                    visible: root.messageInfo.type == ChatMessageInfo.Text
+
+                    onWidthChanged: {
+                        var temp = 252
+                        if(width>temp){
+                            width = temp
+                        }
+                    }
+                }
+
+                TextEdit{
+                    id: filetext
+                    anchors.left: fileImage.right
+                    anchors.leftMargin: 4
+                    anchors.top: parent.top
+                    anchors.topMargin: 8
+                    readOnly: true
+                    selectByMouse :true
+                    wrapMode: TextEdit.Wrap
+                    text: root.messageInfo.contentData
+                    color: "#37444e"
+                    font.pixelSize: 14
+                    font.family: myMDCCommand.Language?"微软雅黑":"Arial"
+                    visible: root.messageInfo.type == ChatMessageInfo.File
+
+                    onWidthChanged: {
+                        var temp = 124
+                        if(width>temp){
+                            width = temp
+                        }
+                    }
+                    MouseArea{
+                        anchors.fill:parent
+                        onClicked: {
+                            //var path = myMDCCommand.localPath+"/mmDownload/";
+                            var path = root.messageInfo.filename.substring(0,root.messageInfo.filename.lastIndexOf("/"))
+                            console.log(root.messageInfo.url)
+                            myMMediaCommand.openDirectory(root.messageInfo.filename.substring(0,root.messageInfo.filename.lastIndexOf("/")));
+                        }
+                    }
+                }
+
+                Component {
+                     id: palyvideo
+                     Rectangle {
+                         anchors.fill: parent
+                         function play()
+                         {
+                             player.stop()
+                             player.play()
+                         }
+
+                         MediaPlayer {
+                             id: mediaplayer
+                             source: root.messageInfo.filename
+
+                             onStatusChanged: {
+                                 if(status == MediaPlayer.EndOfMedia){
+                                     videoloader.sourceComponent = null;
+                                     playBtn.visible = true;
+                                 }
+                             }
+
+                             Component.onCompleted: {
+                                 mediaplayer.play();
+                             }
+                         }
+
+                         VideoOutput {
+                             anchors.fill: parent
+                             source: mediaplayer
+                         }
+                     }
+                }
+
+                Loader {
+                    id: videoloader
+                    anchors.centerIn: parent
+                    width: picImage.width
+                    height: picImage.height
+                    z:200
+                }
+
+                Component {
+                     id: imagegif
+                     AnimatedImage{
+                         id:gifViewer
+                         z:200
+                         anchors.fill: parent
+                         cache: false
+                         fillMode: Image.PreserveAspectFit
+                         asynchronous: true;
+                         property bool bstop: false
+
+                         source: "file:///" + root.messageInfo.filename
+
+                         onCurrentFrameChanged: {
+                             if (currentFrame == 1)
+                             {
+                                 if (bstop)
+                                 {
+                                     gifloader.sourceComponent = null;
+                                     gifplayBtn.visible = true
+                                 }
+                                 bstop = true;
+                             }
+                         }
+                     }
+                }
+
+                Loader {
+                    id: gifloader
+                    anchors.centerIn: parent
+                    width: picImage.width
+                    height: picImage.height
+                    z:200
+                }
+
+                Component {
+                     id: palyaudio
+                     Item{
+                         MediaPlayer {
+                             id: mediaplayer
+                             source: root.messageInfo.filename
+
+                             onStatusChanged: {
+                                 if(status == MediaPlayer.EndOfMedia){
+                                     audioloader.sourceComponent = null;
+                                     audioImg.paused = true;
+                                     audioplayBtn.visible = true;
+                                 }
+                             }
+
+                             Component.onCompleted: {
+                                 mediaplayer.play();
+                             }
+                         }
+                     }
+                }
+
+                Loader {
+                    id: audioloader
+                }
+
+                AnimatedImage{
+                    id:audioImg
+                    width: 122
+                    height: 46
+                    anchors.centerIn: parent
+                    visible: root.messageInfo.type == ChatMessageInfo.Audio
+                    paused: true
+                    source:root.messageInfo.type == ChatMessageInfo.Audio?"/images/dispatch/dispatch_panel_animation_speak.gif":""
+
+                    MouseArea{
+                        anchors.fill: parent
+                        onClicked:{
+                            stopBtn();
+                        }
+                    }
+
+                    Button {
+                        id:audioplayBtn
+                        //visible: root.messageInfo.type == ChatMessageInfo.Audio && root.messageInfo.fileStatus == ChatMessageInfo.STATUS_DOWNLOAD_SUCCESS
+                        visible: true
+                        anchors.centerIn: parent
+                        width: 36
+                        height: 36
+                        z:100
+
+                        style: ButtonStyle{
+                            background: Rectangle{
+                                anchors.fill: parent
+                                color: "transparent"
+                                opacity: (control.hovered||control.pressed)?1:0.8
+                                Image{
+                                    anchors.centerIn: parent
+                                    source:(control.hovered||control.pressed)?"/images/multimedia/message_play_hover.png":"/images/multimedia/message_play.png"
+                                }
+                            }
+                        }
+
+                        onClicked: {
+                            if(cindex == null){
+                                if (audioloader.sourceComponent == null)
+                                {
+                                    audioloader.sourceComponent = palyaudio
+                                    audioImg.paused = false;
+                                    audioplayBtn.visible = false;
+                                    cindex = root;
+                                }
+                            }else{
+                                cindex.stopBtn();
+                                if (audioloader.sourceComponent == null)
+                                {
+                                    audioloader.sourceComponent = palyaudio
+                                    audioImg.paused = false;
+                                    audioplayBtn.visible = false;
+                                    cindex = root;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Image {
+                    id:picImage
+                    visible: root.messageInfo.type == ChatMessageInfo.Image || root.messageInfo.type == ChatMessageInfo.Video
+                    anchors.centerIn: parent
+                    width: 122
+                    height: 46
+                    cache: false
+                    asynchronous: true
+                    fillMode: Image.PreserveAspectFit
+                    source: getImagesource()
+                    property bool bError: false
+                    sourceSize.height: 80
+                    sourceSize.width: 140
+
+                    onImplicitHeightChanged: {
+                        if (implicitHeight > 0)
+                        {
+                            height = implicitHeight
+                        }
+                    }
+
+                    onImplicitWidthChanged: {
+                        if (implicitWidth > 0)
+                        {
+                            width = implicitWidth
+                        }
+                    }
+
+                    onStatusChanged: {
+                        if(status == Image.Error && bError == false)
+                        {
+                            bError = true;
+                            source = root.messageInfo.url
+                        }
+                    }
+
+                    Button {
+                        id:gifplayBtn
+//                        visible: root.messageInfo.filename.toLowerCase().indexOf(".gif") > 0&&
+//                                 (root.messageInfo.fileStatus == ChatMessageInfo.STATUS_DOWNLOAD_SUCCESS
+//                                  || root.messageInfo.fileStatus == ChatMessageInfo.STATUS_UPLOAD_SUCCESS)
+                        visible: false
+                        anchors.centerIn: parent
+                        width: 36
+                        height: 36
+                        z:100
+
+                        style: ButtonStyle{
+                            background: Item{
+                                anchors.fill: parent
+                                Image{
+                                    anchors.centerIn: parent
+                                    source:(control.hovered||control.pressed)?"/images/multimedia/message_play_hover.png":"/images/multimedia/message_play.png"
+                                }
+                            }
+                        }
+
+                        onClicked: {
+                            if (gifloader.sourceComponent == null)
+                            {
+                                gifloader.sourceComponent = imagegif
+                                gifplayBtn.visible = false
+                            }
+                        }
+                    }
+
+                    Button {
+                        id:playBtn
+//                        visible: root.messageInfo.type == ChatMessageInfo.Video&&
+//                                 (root.messageInfo.fileStatus == ChatMessageInfo.STATUS_DOWNLOAD_SUCCESS
+//                                  || root.messageInfo.fileStatus == ChatMessageInfo.STATUS_UPLOAD_SUCCESS)
+                        visible: false
+                        anchors.centerIn: parent
+                        width: 36
+                        height: 36
+                        z:100
+
+                        style: ButtonStyle{
+                            background: Rectangle{
+                                anchors.fill: parent
+                                color: "transparent"
+                                opacity: (control.hovered||control.pressed)?1:0.8
+                                Image{
+                                    anchors.centerIn: parent
+                                    source:(control.hovered||control.pressed)?"/images/multimedia/message_play_hover.png":"/images/multimedia/message_play.png"
+                                }
+                            }
+                        }
+
+                        onClicked: {
+                            if (videoloader.sourceComponent == null)
+                            {
+                                videoloader.sourceComponent = palyvideo
+                                playBtn.visible = false;
+                            }
+                            else
+                            {
+//                                videoloader.visible = true
+//                                videoloader.item.play()
+                            }
+
+
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            if (root.messageInfo.type == ChatMessageInfo.Image &&
+                                    (mode == "right" ||
+                                     root.messageInfo.fileStatus == ChatMessageInfo.STATUS_DOWNLOAD_SUCCESS))
+                            {
+                                myMMediaCommand.popUpImagePage("file:///" + root.messageInfo.filename, root.messageInfo.url);
+                            }
+                            else if(root.messageInfo.type == ChatMessageInfo.Video &&(mode == "right" ||
+                                     root.messageInfo.fileStatus == ChatMessageInfo.STATUS_DOWNLOAD_SUCCESS))
+                            {
+                                var url = root.messageInfo.url;
+                                if (url !== "")
+                                {
+                                    url = url.substring(0,url.lastIndexOf(".")) + ".jpg";
+                                }
+                                myMMediaCommand.popUpVideoPage(root.messageInfo.filename, url);
+                                stopViewer();
+                            }
+
+                            mouse.accepted = false;
+                        }
+                    }
+
+                }
+
+                Image {
+                    id:msgfailimg
+                    visible: mode=="right" && !root.messageInfo.msgSended
+                    width: 24
+                    height: 24
+                    anchors.right: comItem.left
+                    anchors.rightMargin: 20
+                    anchors.verticalCenter: comItem.verticalCenter
+                    source: msgfailimg.visible?"/images/multimedia/message_fail.png":""
+                }
+
+                Text {
+                    id:imageaddresstxt
+                    visible: mode=="left"&&root.messageInfo.type == ChatMessageInfo.Image //收到的图片显示位置信息
+                    text:root.messageInfo.addressInfo
+                    anchors.left: picImage.right
+                    anchors.leftMargin: 10
+                    anchors.bottom: picImage.bottom
+                    anchors.top: picImage.top
+                    color: "#9eb0be"
+                    font.pixelSize: 14
+                    font.family: myMDCCommand.Language?"微软雅黑":"Arial"
+                    width: 150
+                    verticalAlignment: Text.AlignBottom
+                    wrapMode:Text.WordWrap
+                }
+
+                Rectangle {
+                    id:location
+                    visible: root.messageInfo.type == ChatMessageInfo.Location
+                    anchors.fill: parent
+
+                    Text {
+                        id:titletxt
+                        text:root.messageInfo.titleInfo
+                        anchors.left: parent.left
+                        anchors.leftMargin: 5
+                        anchors.top: parent.top
+                        anchors.topMargin: 5
+                        anchors.right: parent.right
+                        anchors.rightMargin: 5
+                        color: "#24344e"
+                        font.pixelSize: 16
+                        font.family: myMDCCommand.Language?"微软雅黑":"Arial"
+                        elide: Text.ElideRight
+                    }
+
+                    Text {
+                        id:addresstxt
+                        text:root.messageInfo.addressInfo
+                        anchors.left: titletxt.left
+                        anchors.top: titletxt.bottom
+                        anchors.topMargin: 5
+                        anchors.right: titletxt.right
+                        color: "#9eb0be"
+                        font.pixelSize: 14
+                        font.family: myMDCCommand.Language?"微软雅黑":"Arial"
+                        elide: Text.ElideRight
+                    }
+
+                    Image {
+                        id:locationImage
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: addresstxt.bottom
+                        anchors.topMargin: 5
+                        anchors.bottom: parent.bottom
+                        property bool bError: false
+                        source: location.visible?root.messageInfo.url:""
+
+                        onStatusChanged: {
+                            if(status == Image.Error && bError == false)
+                            {
+                                bError = true;
+                                source = "file:///" + root.messageInfo.filename;
+                            }
+                        }
+
+                        MouseArea {
+                            id:locationmouse
+                            anchors.fill: parent
+                            cursorShape:Qt.PointingHandCursor
+
+                            onClicked: {
+                                if (root.messageInfo.longitude > 0 && root.messageInfo.latitude > 0)
+                                {
+                                    if(myMDCCommand.anchorType!=MDCCommand.AnchorMap)
+                                    {
+                                        myMDCCommand.setActivePage(MDCCommand.AnchorMap)
+                                    }
+                                    SingletonDevOperaForMap.setMapCenter(root.messageInfo.longitude, root.messageInfo.latitude, root.messageInfo.addressInfo);
+                                }
+                                else
+                                {
+                                    utility.log4qml("chatpage.qml setmapcenter error");
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Menu { // 摄像头菜单
+                      id: menu
+                      style:memuStyle
+                      MenuItem {
+                          text: mode=="left"?myMDCCommand.Language?"继续接收":"keep receiving":myMDCCommand.Language?"继续发送":"keep sending"
+                          onTriggered: {
+                              if (root.messageInfo.fileStatus == ChatMessageInfo.STATUS_UPLOAD_PAUSE)
+                              {
+                                   root.messageInfo.continueUpload(root, rootItem.myuid);
+                                  return;
+                              }
+
+                              if (root.messageInfo.fileStatus == ChatMessageInfo.STATUS_DOWNLOAD_PAUSE)
+                              {
+                                  root.messageInfo.continueDownload(root);
+                                  return;
+                              }
+                          }
+                      }
+
+                      MenuItem {
+                          text: myMDCCommand.Language?"取消":"Cancel"
+                          onTriggered: {
+                              if (mode == "left")
+                              {
+                                  root.messageInfo.stopDownload();
+                              }
+                              else
+                              {
+                                  root.messageInfo.stopUpload();
+                              }
+
+                              mymodel.remove(index)
+                          }
+                      }
+                }
+
+                Button {
+                    id:sendbtn
+                    width: 24
+                    height: 24
+                    anchors.right: fileImage.left
+                    anchors.rightMargin: 26
+                    anchors.verticalCenter: fileImage.verticalCenter
+                    visible:false
+                    //visible: (mode=="right" && root.messageInfo.fileStatus == ChatMessageInfo.STATUS_UPLOADING)?true:false
+                    style: ButtonStyle{
+                        background: Item{
+                            anchors.fill: parent
+                            Image{
+                                id:sendbtnImage
+                                source:(control.hovered || control.pressed)?"/images/popup/popup_delete_h.png":"/images/popup/popup_delete_n.png"
+                            }
+                        }
+                    }
+                    onClicked: {
+                        if (root.messageInfo.fileStatus == ChatMessageInfo.STATUS_UPLOADING)
+                        {
+                            root.messageInfo.pauseUpload();
+                        }
+                    }
+                }
+
+                Button {
+                    id:stopSendBtn
+                    width: 24
+                    height: 24
+                    anchors.right: fileImage.left
+                    anchors.rightMargin: 26
+                    anchors.verticalCenter: fileImage.verticalCenter
+                    visible:false
+                    //visible: (mode=="right" && root.messageInfo.fileStatus == ChatMessageInfo.STATUS_UPLOAD_PAUSE)?true:false
+                    style: ButtonStyle{
+                        background: Item{
+                            anchors.fill: parent
+                            Image{
+                                id:stopSendBtnImage
+                                source:(control.hovered || control.pressed)?"/images/multimedia/message_fail.png":"/images/multimedia/message_fail_h.png"
+                            }
+                        }
+                    }
+                    onClicked: {
+                        menu.popup()
+                    }
+                }
+
+                Button {
+                    id:recvpending
+                    width: 24
+                    height: 24
+                    anchors.left: comItem.right
+                    anchors.leftMargin: 10
+                    anchors.verticalCenter: comItem.verticalCenter
+                   // visible: (mode=="left" && root.messageInfo.fileStatus == ChatMessageInfo.STATUS_DOWNLOAD_PENDING)?true:false
+                    visible: false;
+                    style: ButtonStyle{
+                        background: Item{
+                            anchors.fill: parent
+                            Image{
+                                source:(control.hovered || control.pressed)?"/images/multimedia/download_h.png":"/images/multimedia/download.png"
+                            }
+                        }
+                    }
+
+                    onClicked: {
+                        if (root.messageInfo.fileStatus == ChatMessageInfo.STATUS_DOWNLOAD_PENDING)
+                        {
+                            root.messageInfo.startDownload(root);
+                        }
+                    }
+                }
+
+                Button {
+                    id:receive
+                    width: 24
+                    height: 24
+                    anchors.left: comItem.right
+                    anchors.leftMargin: 10
+                    anchors.verticalCenter: comItem.verticalCenter
+                    visible:false
+                    //visible: (mode=="left" && root.messageInfo.fileStatus == ChatMessageInfo.STATUS_DOWNLOADING)?true:false
+
+                    style: ButtonStyle{
+                        background: Item{
+                            anchors.fill: parent
+                            Image{
+                                source:(control.hovered || control.pressed)?"/images/popup/popup_delete_h.png":"/images/popup/popup_delete_n.png"
+                            }
+                        }
+                    }
+
+                    onClicked: {
+                        if (root.messageInfo.fileStatus == ChatMessageInfo.STATUS_DOWNLOADING)
+                        {
+                            root.messageInfo.pauseDownload();
+                        }
+                    }
+                }
+
+                Button {
+                    id:stop
+                    width: 24
+                    height: 24
+                    anchors.left: comItem.right
+                    anchors.leftMargin: 10
+                    anchors.verticalCenter: comItem.verticalCenter
+                    visible:false
+                    //visible: (mode=="left" && root.messageInfo.fileStatus == ChatMessageInfo.STATUS_DOWNLOAD_PAUSE)?true:false
+                    style: ButtonStyle{
+                        background: Item{
+                            anchors.fill: parent
+                            Image{
+                                id:stopBtnImage
+                                source:(control.hovered || control.pressed)?"/images/multimedia/message_fail.png":"/images/multimedia/message_fail_h.png"
+                            }
+                        }
+                    }
+                    onClicked: {
+                            menu.popup();
+                    }
+                }
+
+                MyProgress {
+                    id:progressbar
+                    anchors.centerIn: parent
+                    maximumValue:root.maxvalue
+                    currentValue:root.progress
+                    //visible: (root.messageInfo.fileStatus == ChatMessageInfo.STATUS_DOWNLOADING ||
+                    //         root.messageInfo.fileStatus == ChatMessageInfo.STATUS_UPLOADING)?true:false
+                    visible: false
+                }
+
+                Text {
+                    id:progressValue
+                    anchors.left: progressbar.right
+                    anchors.leftMargin: 12
+                    anchors.verticalCenter: progressbar.verticalCenter
+                    color: "#ffffff"
+                    font.pixelSize: 14
+                    font.family: "Arial"
+                    text:root.percent + "%"
+                    visible: progressbar.visible
+                }
+
+                Connections{
+                    target: root.messageInfo//记录自己各种信息的类对象
+                    onUrlChanged: {
+                        if (picImage.bError)
+                        {
+                            picImage.source = arg;
+                        }
+                    }
+
+                    onFileStatusChanged:{
+                        switch (root.messageInfo.fileStatus){
+                        case ChatMessageInfo.STATUS_DOWNLOADING:
+                        {
+                            progressbar.visible = true;
+                            recvpending.visible = false;
+                            receive.visible = true;
+                            stop.visible = false;
+                            filetext.visible = false;
+                        }
+                            break;
+                        case ChatMessageInfo.STATUS_DOWNLOAD_FAILED:
+                        {
+                            progressbar.visible = false;
+                            recvpending.visible = false;
+                            receive.visible = false;
+                            stop.visible = false;
+                            if (root.messageInfo.type == ChatMessageInfo.Image)
+                            {
+                                picImage.source = "/images/multimedia/message_fail_pic.png"
+                            }
+
+                            if (root.messageInfo.type == ChatMessageInfo.Video)
+                            {
+                                picImage.source = "/images/multimedia/message_fail_vid.png"
+                            }
+
+                            if (root.messageInfo.type == ChatMessageInfo.File)
+                            {
+                                filetext.visible = true;
+                                fileImage.source = "/images/multimedia/message_fail_file_s.png"
+                            }
+                        }
+                            break;
+                        case ChatMessageInfo.STATUS_DOWNLOAD_PAUSE:
+                        {
+                            progressbar.visible = false;
+                            recvpending.visible = false;
+                            receive.visible = false;
+                            stop.visible = true;
+                            if (root.messageInfo.type == ChatMessageInfo.File)
+                            {
+                                filetext.visible = true;
+                            }
+                        }
+                            break;
+                        case ChatMessageInfo.STATUS_DOWNLOAD_SUCCESS:
+                        {
+                            progressbar.visible = false;
+                            recvpending.visible = false;
+                            receive.visible = false;
+                            stop.visible = false;
+
+                            if (root.messageInfo.filename.toLowerCase().indexOf(".gif") > 0)
+                            {
+                                gifloader.sourceComponent = imagegif
+                            }
+
+                            if (root.messageInfo.type == ChatMessageInfo.File)
+                            {
+                                filetext.visible = true;
+                            }else if (root.messageInfo.type == ChatMessageInfo.Audio)
+                            {
+                                audioplayBtn.visible = true;
+                            }else if (root.messageInfo.type == ChatMessageInfo.Video)
+                            {
+                                playBtn.visible = true;
+                            }
+                        }
+                            break;
+                        case ChatMessageInfo.STATUS_DOWNLOAD_PENDING:
+                        {
+                            progressbar.visible = false;
+                            recvpending.visible = true;
+                            receive.visible = false;
+                            stop.visible = false;
+                        }
+                            break;
+                        case ChatMessageInfo.STATUS_UPLOADING:
+                        {
+                            progressbar.visible = true;
+                            sendbtn.visible = true;
+                            stopSendBtn.visible = false;
+                            filetext.visible = false;
+                        }
+                            break;
+                        case ChatMessageInfo.STATUS_UPLOAD_FAILED:
+                        {
+                            progressbar.visible = false;
+                            sendbtn.visible = false;
+                            stopSendBtn.visible = false;
+                            if (root.messageInfo.type == ChatMessageInfo.Image)
+                            {
+                                picImage.source = "/images/multimedia/message_fail_pic.png"
+                            }
+
+                            if (root.messageInfo.type == ChatMessageInfo.Video)
+                            {
+                                picImage.source = "/images/multimedia/message_fail_vid.png"
+                            }
+
+                            if (root.messageInfo.type == ChatMessageInfo.File)
+                            {
+                                filetext.visible = true;
+                                fileImage.source = "/images/multimedia/message_fail_file_s.png"
+                            }
+                        }
+                            break;
+                        case ChatMessageInfo.STATUS_UPLOAD_PAUSE:
+                        {
+                            progressbar.visible = false;
+                            sendbtn.visible = false;
+                            stopSendBtn.visible = true;
+                            if (root.messageInfo.type == ChatMessageInfo.File)
+                            {
+                                filetext.visible = true;
+                            }
+                        }
+                            break;
+                        case ChatMessageInfo.STATUS_UPLOAD_SUCCESS:
+                        {
+                            progressbar.visible = false;
+                            sendbtn.visible = false;
+                            stopSendBtn.visible = false;
+                            if (root.messageInfo.type == ChatMessageInfo.File)
+                            {
+                                filetext.visible = true;
+                            }
+
+                            if (root.messageInfo.type == ChatMessageInfo.Video)
+                            {
+                                playBtn.visible = true;
+                                var url = root.messageInfo.url;
+                                if (url == "")
+                                {
+                                    return;
+                                }
+
+                                var picurl = url.substring(0,url.lastIndexOf(".")) + ".jpg";
+                                picImage.source = picurl;
+                            }
+
+                            if (root.messageInfo.filename.toLowerCase().indexOf(".gif") > 0)
+                            {
+                                gifloader.sourceComponent = imagegif
+                            }
+                        }
+                            break;
+                        default:
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

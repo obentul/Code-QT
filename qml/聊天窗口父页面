@@ -1,0 +1,173 @@
+import QtQuick 2.2
+import QtQml.Models 2.1
+import QtQuick.Controls 1.4
+import QtQuick.Controls.Styles 1.4
+import utility 1.0
+import addrCommand 1.0
+import "../"
+import "../widgets"
+import "../panels"
+import "../pages"
+import "../apis"
+import "../widgets"
+
+//聊天页面
+//主要包括：布局；聊天窗口布局管理(参考mds的视频9宫格)
+
+BasePage {
+    id:messagePageRoot
+    anchors.fill: parent
+
+    property int g_gridNum:2
+    property int span:1                                                         //旧布局，不使用
+    property int itemW: (wrapper_cp.width-span*(g_gridNum-1))/g_gridNum         //旧布局，不使用
+    property int itemH: (wrapper_cp.height-span*(g_gridNum-1))/g_gridNum        //旧布局，不使用
+
+    property int spacenew:6
+    property int itemWnew:(wrapper_cp.width-spacenew*(g_gridNum-1))/g_gridNum
+    property int itemHnew:(wrapper_cp.height-spacenew*(g_gridNum-1))/g_gridNum
+
+    property bool is_chatpanelvisible:true
+    property var allGridItems: [item0,item1,item2,item3]
+    property var itemBegin
+    property var itemEnd
+    radius:10
+
+    property bool isFavorPanelVis: false
+
+    function setGridLayout()
+    {
+        var i,j,index;
+        for (i=0;i<2;i++)
+        {
+            for(j=0;j<2;j++)
+            {
+                index = i*2+j;
+                allGridItems[index].x=j*itemW;
+                allGridItems[index].y=i*itemH;
+                allGridItems[index].width=itemW;
+                allGridItems[index].height=itemH;
+                allGridItems[index].visible=true;
+
+            }
+        }
+    }
+
+    function setGridLayoutNew()
+    {
+        var x,y,index;
+        for (y=0;y<2;y++)
+        {
+            for(x=0;x<2;x++)
+            {
+                index = y*2+x;
+                allGridItems[index].x=x*itemWnew+x*spacenew;
+                allGridItems[index].y=y*itemHnew+y*spacenew;
+                allGridItems[index].width=itemWnew;
+                allGridItems[index].height=itemHnew;
+                allGridItems[index].visible=true;
+
+            }
+        }
+    }
+
+
+    Component.onCompleted: {
+        console.log("messagePageRoot complete")
+        myMMediaCommand.getallGridItems();
+    }
+
+    onItemWnewChanged: {
+            setGridLayoutNew();
+    }
+
+    onItemHnewChanged: {
+            setGridLayoutNew();
+    }
+
+    Image{
+        id:bgimage
+        anchors.fill:parent
+        source:"qrc:/images/sms/sms_bg_8.png"
+        fillMode: Image.Tile
+    }
+
+    //收藏夹弹窗
+    Rectangle{
+        id:favorRec
+        objectName: "favorParentItem_message"
+        width: 340
+        height: 440
+        border.color: "#57abeb"
+        border.width: 2
+        x:(messagePageRoot.width - favorRec.width)/2
+        y:(messagePageRoot.height - favorRec.height)/2
+        visible: isFavorPanelVis&&myVideoCommand.isFavorPanelVis
+        z:200
+        Drag.active: item_mouse_favor.drag.active
+        MouseArea{
+            id: item_mouse_favor
+            anchors.fill: parent
+            drag.target: parent
+            onClicked: {
+            }
+            onReleased: {
+            }
+        }
+    }
+
+    Rectangle{
+        id:wrapper_cp
+        anchors.top: parent.top
+        anchors.topMargin: 6
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 6
+        anchors.left: parent.left
+        anchors.leftMargin: 6
+        anchors.right: chatpanel.left
+        anchors.rightMargin: 6
+        objectName: "chatRect"
+        color: "transparent"
+        radius:10
+
+        Rectangle{
+            id: item0
+            objectName: "item0"
+            //color: "#172130"
+            color: "transparent"
+            radius: 10
+        }
+        Rectangle{
+            id: item1
+            objectName: "item1"
+            //color: "#172130"
+            color: "transparent"
+            radius: 10
+        }
+        Rectangle{
+            id: item2
+            objectName: "item2"
+            //color: "#172130"
+            color: "transparent"
+            radius: 10
+        }
+        Rectangle{
+            id: item3
+            objectName: "item3"
+            //color: "#172130"
+            color: "transparent"
+            radius: 10
+        }
+    }
+
+    ChatPanel{
+        id:chatpanel
+        objectName: "chatPanel"
+        anchors.top:parent.top
+        anchors.bottom: parent.bottom
+        anchors.right:parent.right
+
+        width:340
+        visible: is_chatpanelvisible
+    }
+}
