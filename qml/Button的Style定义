@@ -1,0 +1,25 @@
+    Button{//close button
+        id:btn_close
+        width: 30
+        height: 30
+        anchors.right: parent.right
+        anchors.rightMargin: 17
+        anchors.verticalCenter:nameTitle.verticalCenter
+
+        z:bg_z+1
+
+        style: ButtonStyle{
+            background: Item{
+                anchors.fill: parent
+                Image{
+                    source:(control.hovered || control.pressed)?"qrc:/images/sms/popup_button_close_hover.png":"qrc:/images/sms/popup_button_close_normal.png"
+                }
+            }
+        }
+
+        onClicked: {
+            myMMediaCommand.appendVaccantItems(chatPageRoot.parent.objectName);
+            chatPageRoot.visible=false;
+            myMMediaCommand.removefromCurChatPage(myuid);
+        }
+    }
