@@ -1,0 +1,622 @@
+import QtQuick 2.0
+import QtQuick.Controls 1.4
+import QtQuick.Controls.Styles 1.4
+import addrCommand 1.0
+import utility 1.0
+import chatmessage 1.0
+import "../widgets"
+import "../pages"
+import "../widgets"
+
+//mds的MutilMidiaPanel.qml
+//历史聊天记录
+
+Rectangle {
+    id:wrapper
+
+
+    property bool isEditing:false;
+    property ChatPage currentShowPage//记录当前显示中的聊天页面
+
+    function addItem2top(item){
+        var data={
+            "uid":item.uid,
+            "sendTime":"",
+            "sendContent":"",
+            "newMsg":false,
+            "obj_item": item,
+            "fullTime":""
+        }
+        utility.log4qml("addItem2top " + item.uid);
+        mymodel.append(data)//增加条目
+    }
+
+    function moveTop(uid){
+        var position = 0
+        for(var i=0;i<mymodel.count;i++)
+        {
+            if(uid===mymodel.get(i).uid)
+            {
+                position = i
+                break
+            }
+        }
+        mymodel.move(position,0,1)
+    }
+
+
+
+    Connections {
+         target: SingletonDevOperaForMap
+         onSendMsgOnMap:{
+          //参数名称 userInfo {"uid":"460030956060003","name":"caiyan0003","utype":"1"}
+             var id= userInfo.uid;
+             var name = userInfo.name;
+             var utype = userInfo.utype;
+             myMDCCommand.setActivePage(MDCCommand.AnchorMessage)  //切换至Message页面
+             myMMediaCommand.addToMMediaList(name,id, utype);
+             myMMediaCommand.showChatPageNew(id,name);
+             //myMDCCommand.showMMPanel();
+         }
+    }
+    Connections{
+        target: myMMediaCommand
+        onAddMMediaItem:{
+            addItem2top(item)
+        }
+        onMoveTop:{
+            moveTop(uid)
+        }
+        onUpdateUserList:{
+            utility.log4qml("onUpdatelistmessage")
+            var position = -1;
+            for(var i=0;i<mymodel.count;i++)
+            {
+                if(uid===mymodel.get(i).uid)
+                {
+                    position = i
+                    break
+                }
+            }
+
+            if (position == -1)
+            {
+                return;
+            }
+
+            if (time != "" && time != null)
+            {
+                mymodel.setProperty(position,"sendTime",time)
+            }
+
+            if (data !== "" && data != null)
+            {
+                if(type === ChatMessageInfo.Text)
+                {
+                    mymodel.setProperty(position,"sendContent",data)
+                }
+                else if(type === ChatMessageInfo.Image)
+                {
+                    mymodel.setProperty(position,"sendContent",myMDCCommand.Language?"[图片]":"[Picture]")
+                }
+                else if(type === ChatMessageInfo.Video)
+                {
+                    mymodel.setProperty(position,"sendContent",myMDCCommand.Language?"[视频]":"[Video]")
+                }
+                else if(type === ChatMessageInfo.File)
+                {
+                    mymodel.setProperty(position,"sendContent",myMDCCommand.Language?"[文件]":"[File]")
+                }
+                else if(type === ChatMessageInfo.Audio)
+                {
+                    mymodel.setProperty(position,"sendContent",myMDCCommand.Language?"[语音]":"[Audio]")
+                }
+                else if(type === ChatMessageInfo.Location)
+                {
+                    mymodel.setProperty(position,"sendContent",myMDCCommand.Language?"[位置]":"[Location]")
+                }
+            }
+
+            if (fulltime != "" && fulltime != null)
+            {
+                mymodel.setProperty(position,"fullTime",fulltime)
+            }
+
+            mymodel.setProperty(position,"newMsg",bnew)
+        }
+        onQueryGroupsAndJoin:{
+            if (myMDCCommand.mmLogined)
+            {
+                myMDCCommand.queryAllGroup(myMDCCommand.userName,queryALLGroupFinished);
+            }
+        }
+        onClear:{
+            mymodel.clear()
+        }
+
+        //对列表按时间进行冒泡排序
+        onSortMemberByTime:{
+            var rowCount = mymodel.count;
+            for(var i = 0; i < rowCount; i++)
+                {
+                    for(var j = 0; i + j < rowCount - 1; j++)
+                    {
+                        if(mymodel.get(j).fullTime < mymodel.get(j+1).fullTime)
+                        {
+                            mymodel.move(j+1,j,1);
+                        }
+                    }
+                }
+        }
+
+        //删除管理台中已经不存在的用户和群组
+        onDelItemFromList:{
+            utility.log4qml("onDelItemFromList")
+            for(var i=0;i<mymodel.count;i++)
+            {
+                if(uid===mymodel.get(i).uid)
+                {
+                    mymodel.remove(i);
+                    break;
+                }
+            }
+        }
+    }
+
+    function queryALLGroupFinished( error, id ,data ) {
+        if(error){
+            return
+        }
+        else
+        {
+            data = JSON.parse(data);
+            if(data.msg == "success") {
+                if (undefined != data.obj.data) {
+                    for (var index in data.obj.data) {
+                        if (undefined == data.obj.data[index] || undefined == data.obj.data[index].uid) {
+                            continue;
+                        }
+                        //mySDKHelper.sdkjoinMUCRoom(data.obj.data[index].uid)
+                    }
+                }
+            } else {
+                utility.log4qml("error MdsMessage.mmLogin--Get group list for MM failed.");
+            }
+        }
+    }
+
+    function selectALL(checked){
+        for(var i=0;i<mymodel.count;i++)
+        {
+            mymodel.get(i).obj_item.isChecked = checked
+        }
+    }
+
+    function delItems(){
+        for(var i=0;i<mymodel.count;i++)
+        {
+            if(mymodel.get(i).obj_item.isChecked)
+            {
+                var container = mymodel.get(i).obj_item.container
+                console.log("container :" + container)
+                myMMediaCommand.appendVaccantItems(container)
+                mymodel.remove(i)
+                i--;//下次才能索引到正确的位置
+            }
+        }
+    }
+
+    Component.onCompleted: {
+        utility.log4qml("multimediaPanel.qml oncompleted")
+        myMMediaCommand.loadDataBaseMsg()
+    }
+
+    Rectangle{//“全部消息”+消息管理按键
+        id:toolBar
+        height:50
+        width:parent.width
+        anchors.top:parent.top
+        anchors.left: parent.left
+        color: "#C6D1DC"
+
+        Text {//标题
+            text: myMDCCommand.Language?"全部消息":"All Messages"
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
+            color: "#333E46"
+            font.pixelSize: 14
+            font.family: myMDCCommand.Language?"微软雅黑":"Arial"
+            font.bold: true
+        }
+
+        Button{//消息管理按键
+            id:editBtn
+            width: isEditing?(myMDCCommand.Language?30:62):24
+            height: 24
+            anchors.right: parent.right
+            anchors.rightMargin: 12
+            anchors.verticalCenter: parent.verticalCenter
+            style: ButtonStyle{
+                background: Item{
+                    anchors.fill: parent
+                    Image{
+                        source:(control.hovered || control.pressed)?"qrc:/images/multimedia/message_icon_delete_hover.png":"qrc:/images/multimedia/message_icon_delete.png"
+                        visible:!isEditing
+                    }
+                    Label{
+                        text:myMDCCommand.Language?"全选":"Select all"
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.right: parent.right
+                        font.family: myMDCCommand.Language?"微软雅黑":"Arial"
+                        font.pixelSize: 16
+                        visible:isEditing
+                        color:(control.hovered || control.pressed)?"#2d91eb":"#697d8d"
+                    }
+                }
+            }
+            property bool isALL:false
+            onClicked:{
+                if(!isEditing)
+                {
+                    isEditing = true
+                }
+                else
+                {
+                    isALL = !isALL
+                    selectALL(isALL)
+                }
+            }
+        }
+    }
+
+    Rectangle {//分割线
+        id: horizontalRule
+        color: "#b8c7d3"
+        anchors.left: parent.left
+        //anchors.leftMargin: 2
+        anchors.top: toolBar.bottom
+        anchors.right: parent.right
+       // anchors.rightMargin: 2
+        height: 1
+    }
+
+    Rectangle{//历史记录列表
+        anchors.top:horizontalRule.bottom
+        anchors.bottom: parent.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: 340
+        color: "#f2f7ff"
+        clip: true
+
+        MyScrollView{
+            anchors.fill: parent
+            bgColor:"#000000"
+            selColor: "#0779d0"
+            normalColor: "#57abeb"
+
+            ListView{
+               id: list
+               anchors.fill: parent
+               spacing :0
+               model: ListModel{
+                   id:mymodel
+               }
+               delegate: mmediaDelegate
+            }
+        }
+    }
+
+    Rectangle{//点击消息管理按键后，弹出的取消和删除
+       id:btnArea
+       anchors.bottom: parent.bottom
+       height:72
+       width:parent.width
+       visible: isEditing
+       color:"#eef1f2"
+
+       Button{//取消按键
+           id:cancelBtn
+           width: 149
+           height:52
+           anchors.left: parent.left
+           anchors.leftMargin: 12
+           anchors.top: parent.top
+           anchors.topMargin: 10
+           visible:isEditing
+           style: ButtonStyle{
+               background: Item{
+                   anchors.fill: parent
+                   Image{
+                       source:(control.hovered || control.pressed)?"qrc:/images/dispatch/message_button_cancel_h.png":"qrc:/images/dispatch/message_button_cancel_n.png"
+                   }
+                   Text {
+                       text:myMDCCommand.Language?"取消":"Cancel"
+                       font.family: myMDCCommand.Language?"微软雅黑":"Arial"
+                       font.pixelSize: 16
+                       color: "#509edc"
+                       anchors.centerIn: parent
+                   }
+               }
+           }
+           onClicked:{
+               editBtn.isALL = false
+               isEditing = false
+               selectALL(false)
+           }
+       }
+
+       Button{//删除按键
+           id:delBtn
+           width: 149
+           height:52
+           anchors.top: parent.top
+           anchors.topMargin: 10
+           anchors.left: cancelBtn.right
+           anchors.leftMargin: 8
+           visible:isEditing
+           style: ButtonStyle{
+               background: Item{
+                   anchors.fill: parent
+                   Image{
+                       source:(control.hovered || control.pressed)?"qrc:/images/dispatch/message_button_delete_h.png":"qrc:/images/dispatch/message_button_delete_n.png"
+                   }
+                   Text {
+                       text:myMDCCommand.Language?"删除":"Delete"
+                       font.family: myMDCCommand.Language?"微软雅黑":"Arial"
+                       font.pixelSize: 16
+                       color: "#ff9600"
+                       anchors.centerIn: parent
+                   }
+               }
+           }
+           onClicked:{
+               editBtn.isALL = false
+               isEditing = false
+               delItems()
+               myMMediaCommand.delFromMediaList()
+           }
+       }
+    }
+
+    Component{//每一条的样式
+        id:mmediaDelegate
+        Rectangle{//外包裹1
+            width:parent.width
+            height: 85
+            property bool isFocused:false
+            property var curItem: obj_item
+            property string time: sendTime
+            property string content: sendContent
+            property bool bNewMsg: newMsg
+            color: isFocused?"#f0f3f4":"#dbe2e9"
+
+            Item{//外包裹2
+                id:wrapper1
+                anchors.fill: parent
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    propagateComposedEvents: false
+                    onEntered: {
+                        if (!isEditing)
+                        {
+                            isFocused = true
+                        }
+                    }
+                    onExited: {
+                        if (!isEditing)
+                        {
+                            isFocused = false
+                        }
+                    }
+                    onClicked: {
+                        if (!isEditing)
+                        {
+                            list.currentIndex = index
+                            utility.log4qml("mmediaDelegate click uid:" + curItem.uid);
+                            myMMediaCommand.showChatPageNew(curItem.uid,curItem.name)   //[yangkun][todo]
+                        }
+                    }
+                }
+
+                Image{//新消息到达图标
+                    id:iconImg
+                    width: 25
+                    height: 25
+                    visible: bNewMsg
+                    anchors.top: parent.top
+                    anchors.topMargin: 21
+                    anchors.left: parent.left
+                    anchors.leftMargin: 15
+                    source:"qrc:/images/sms/sms_icon_sms_new.png"
+                }
+
+                Text{//对方的name
+                    id:nameTxt
+                    anchors.left: iconImg.right
+                    anchors.leftMargin: 15
+                    anchors.top:parent.top
+                    anchors.topMargin: 21
+                    width: 190
+                    //height: 18
+                    text: curItem.name
+                    color: "#58656f"
+                    font.bold: bNewMsg?true:false
+                    font.pixelSize: 13
+                    font.family: myMDCCommand.Language?"微软雅黑":"Arial"
+                    elide: Text.ElideRight
+                }
+
+                Text{//具体内容
+                    id:contentTxt
+                    anchors.top: nameTxt.bottom
+                    anchors.topMargin: 17
+                    anchors.left: nameTxt.left
+                    width: 294
+                    height: 18
+                    text: content
+                    color: "#697d8d"
+                    font.pixelSize: 12
+                    font.family: myMDCCommand.Language?"微软雅黑":"Arial"
+                    elide: Text.ElideRight  //长度超过294，则显示省略号
+                }
+
+                Text{//时间
+                    id:timeTxt
+                    width: 96
+                    height: 12
+                    anchors.right: parent.right
+                    anchors.rightMargin: 16
+                    anchors.verticalCenter: iconImg.verticalCenter
+                    horizontalAlignment:Text.AlignRight
+                    text: time
+                    color: "#97a7b4"
+                    font.pixelSize: 12
+                    font.family: myMDCCommand.Language?"微软雅黑":"Arial"
+                }
+
+                CheckBox {//删除勾选
+                    id: delCheck
+                    width:24
+                    height:24
+                    anchors.right: parent.right
+                    anchors.rightMargin: 16
+                    anchors.top: timeTxt.bottom
+                    //anchors.topMargin: 8
+                    visible: isEditing
+                    style: CheckBoxStyle {
+                        indicator: Item{
+                            implicitHeight: control.height
+                            implicitWidth: control.height
+                            Image {
+                                width: control.height
+                                height: control.height
+                                source: curItem.isChecked?"qrc:/images/dispatch/message_checkbox_s.png":"qrc:/images/dispatch/message_checkbox.png"
+                            }
+                        }
+                    }
+                    onClicked:
+                    {
+                        curItem.isChecked = !curItem.isChecked
+                    }
+                }
+            }
+
+            Rectangle {//条目之间的分界线
+                color: "#C6D1DC"
+                anchors.left: parent.left
+                anchors.bottom: parent.bottom
+                anchors.right: parent.right
+                height: 1
+            }
+        }
+    }
+
+    Rectangle { //mm服务器连接失败，重登
+        id:reloginrect
+        anchors.fill: parent
+        visible: !myMDCCommand.mmLogined  && (myMDCCommand.loginStatus == MDCCommand.Logining || myMDCCommand.loginStatus == MDCCommand.LoginFinished)
+        //visible:false
+        color: "#F2F7FF"
+
+        MouseArea{
+            anchors.fill: parent
+            onPressed:{
+                 mouse.accepted = true
+            }
+        }
+
+        Rectangle{
+            height:50
+            width:parent.width
+            anchors.top:parent.top
+            anchors.left: parent.left
+            color: "#E3E8F0"
+
+            Text {
+                text: myMDCCommand.Language?"短彩信":"Message"
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.verticalCenter: parent.verticalCenter
+                color: "#37444e"
+                font.pixelSize: 16
+                font.family: myMDCCommand.Language?"微软雅黑":"Arial"
+            }
+        }
+
+        Rectangle {
+            id: horizontalRule3
+            color: "#b8c7d3"
+            anchors.left: parent.left
+            anchors.top: toolBar.bottom
+            anchors.right: parent.right
+            height: 1
+        }
+
+        //等待转圈
+        AnimatedImage{
+            id:waitGif
+            anchors.centerIn: parent
+            width:20
+            height:20
+            paused: !mySDKHelper.isMMLogining
+            visible: mySDKHelper.isMMLogining
+            source: "/images/window/waitting.gif"
+        }
+
+        Column {
+            id:col
+            anchors.centerIn: parent
+//            visible: !mySDKHelper.isMMLogining
+            spacing: 10
+
+            Rectangle {
+                id:imagerect
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: 80
+                height: 80
+                clip:true
+                color: "transparent"
+                Image{
+                    source:"/images/multimedia/message_login.png"
+                    x:0
+                    y:0
+                }
+            }
+
+            Text {
+                id: nameTxt
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: myMDCCommand.Language?"短信服务器异常":"message server longin fail"
+                font.family: myMDCCommand.Language?"微软雅黑":"Arial"
+                font.pixelSize: 14
+                color: "#CFD4D7"
+            }
+
+            Button {
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: 200
+                height:44
+
+                style: ButtonStyle{
+                    background: Rectangle{
+                        anchors.fill: parent
+                        radius: 1
+                        color:(control.hovered || control.pressed)?"#2fbbd2":"#44a9d8"
+                        Text{
+                            anchors.centerIn: parent
+                            color: "#ffffff"
+                            font.family: myMDCCommand.Language?"微软雅黑":"Arial"
+                            font.pixelSize: 16
+                            text:myMDCCommand.Language?"重新登录":"login"
+                        }
+                    }
+                }
+
+                onClicked: {
+                    mySDKHelper.sdkMMLogin();
+                }
+            }
+        }
+    }
+
+}
