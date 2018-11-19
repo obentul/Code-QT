@@ -1,0 +1,30 @@
+            TextField{
+                id: ipTxt
+                width: 290
+                height: 48
+                anchors.left: parent.left
+                anchors.leftMargin: 20
+                anchors.verticalCenter: imgIp.verticalCenter
+                KeyNavigation.up: passwordTxt
+                KeyNavigation.down: usrTxt
+                KeyNavigation.tab: KeyNavigation.down
+                text:utility.value("serverIP")
+                placeholderText: myMDCCommand.Language?"服务端IP地址":"Server IP"
+                validator: RegExpValidator{
+                    iregExp: /^(?:(?:2[0-4][0-9]\.)|(?:25[0-5]\.)|(?:1[0-9][0-9]\.)|(?:[1-9][0-9]\.)|(?:[0-9]\.)){3}(?:(?:2[0-4][0-9])|(?:25[0-5])|(?:1[0-9][0-9])|(?:[1-9][0-9])|(?:[0-9]))$/
+                }
+                font.family: myMDCCommand.Language?"微软雅黑":"Arial"
+                font.pixelSize: 14
+                style: TextFieldStyle {
+                        textColor: "#496C8B"
+                        placeholderTextColor : "#496C8B"
+                        background: Item {
+                        }
+                }
+                onAccepted:{
+                    loginBtn.clicked()
+                }
+                Keys.onDeletePressed: {
+                    text = ""
+                }
+            }
