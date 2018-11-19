@@ -9,9 +9,9 @@
                 KeyNavigation.down: usrTxt
                 KeyNavigation.tab: KeyNavigation.down
                 text:utility.value("serverIP")
-                placeholderText: myMDCCommand.Language?"服务端IP地址":"Server IP"
-                validator: RegExpValidator{
-                    iregExp: /^(?:(?:2[0-4][0-9]\.)|(?:25[0-5]\.)|(?:1[0-9][0-9]\.)|(?:[1-9][0-9]\.)|(?:[0-9]\.)){3}(?:(?:2[0-4][0-9])|(?:25[0-5])|(?:1[0-9][0-9])|(?:[1-9][0-9])|(?:[0-9]))$/
+                placeholderText: myMDCCommand.Language?"服务端IP地址":"Server IP"	//常显示内容，点击被清除，用来告知填写着当前输入框内应该填入什么内容
+                validator: RegExpValidator{	//如果validator条件无法满足，那么TextField的任何动作都不能被执行，包括onAccepted
+                  iregExp: /^(?:(?:2[0-4][0-9]\.)|(?:25[0-5]\.)|(?:1[0-9][0-9]\.)|(?:[1-9][0-9]\.)|(?:[0-9]\.)){3}(?:(?:2[0-4][0-9])|(?:25[0-5])|(?:1[0-9][0-9])|(?:[1-9][0-9])|(?:[0-9]))$/
                 }
                 font.family: myMDCCommand.Language?"微软雅黑":"Arial"
                 font.pixelSize: 14
