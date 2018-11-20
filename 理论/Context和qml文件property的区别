@@ -1,0 +1,7 @@
+Context属于engine，engine管理所有的qml文件
+
+engine的Context对于所有qml文件都可被访问，相当于全局变量
+
+qml的property如果想在qml之间互相被访问，那么就需要通过objectname先找到相应的实例，然后再访问属性
+
+小结：可以吧Context看做是全局变量，property看作是各个函数的局部变量
