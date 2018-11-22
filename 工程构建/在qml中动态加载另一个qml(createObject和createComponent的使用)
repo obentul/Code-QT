@@ -1,0 +1,76 @@
+使用
+object createComponent(url, mode, parent)
+来创建一个Component组件，相当于把createComponent语句替换成一个Component(可以想象成#include头文件的模式)
+由于Component是不可见的。因此在qml文件中这个组件尚属于不可见，需要使用createComponent来动态加载，以实现可视化
+
+使用
+object createComponent(url, mode, parent)
+来动态加载Component，以实现组件的可视化
+
+  
+import QtQuick 2.0
+
+  Item {
+      id: container
+      width: 300; height: 300
+
+          var component = Qt.createComponent("Button.qml");	//使用Button.qml替换
+          if (component.status == Component.Ready) {
+              var button = component.createObject(container);
+              button.color = "red";
+          }
+
+  }
+
+假设Button.qml如下：
+
+Rectangle{
+	id:button
+	text:"xxxx"
+}
+
+
+那么使用Qt.createComponent后，Item将变成下面这样：
+Item {
+    id: container
+    width: 300; height: 300
+
+    Component{
+	Rectangle{
+		id:button
+		text:"xxx"
+	}
+
+    }
+
+        if (component.status == Component.Ready) {
+            var button = component.createObject(container);
+            button.color = "red";
+        }
+
+    
+}
+
+然后再使用component.createObject进行实例化，那么进一步有：
+Item {
+    id: container
+    width: 300; height: 300
+
+        Rectangle{
+                id:button
+                text:"xxx"
+		color:"red"
+        }
+}
+
+
+	（*）注意：这里的createComponent 和 component.createObject都会自动附着到当前所在范围内的组件上，成为其child
+		   那么如果Item被销毁了，那么替换出来的Component和实例化出来的Object都将消失
+
+
+	（*）一定要注意上下文范围，父组件消失后，其内部的东西都消失，所以如果想让动态创建的qml在当前qml范围内有效，那么就把createComponet和createObject语句都
+	拿到最外层来执行，比如可以创建一个函数func，然后把这两个语句都放到函数里，再把函数放到最外层qml下
+
+
+
+	ps :  起始这两个函数都有一个指定parent入参，但是使用时貌似不生效，需要后期研究

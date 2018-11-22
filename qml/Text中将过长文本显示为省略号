@@ -23,10 +23,38 @@ elide : enumeration
 Set this property to elide parts of the text fit to the Text item's width. The text will only elide if an explicit width has been set.
 This property cannot be used with rich text.
 Eliding can be:
-Text.ElideNone - the default
-Text.ElideLeft
-Text.ElideMiddle
-Text.ElideRight
+Text.ElideNone - 	全部显示
+Text.ElideLeft		优先显示右侧内容，左侧省略
+Text.ElideMiddle	优先显示中部内容，两侧省略
+Text.ElideRight		优先显示左侧内容，右侧省略(一般用这个)
 If this property is set to Text.ElideRight, it can be used with wrapped text. The text will only elide if maximumLineCount, or height has been set. If both maximumLineCount and height are set, maximumLineCount will apply unless the lines do not fit in the height allowed.
 If the text is a multi-length string, and the mode is not Text.ElideNone, the first string that fits will be used, otherwise the last will be elided.
 Multi-length strings are ordered from longest to shortest, separated by the Unicode "String Terminator" character U009C (write this in QML with "\u009C" or "\x9C").
+
+
+
+
+        Text {
+            id:text_1
+            //anchors.horizontalCenter: parent.horizontalCenter
+            anchors.left: parent.left
+            anchors.right: image_quit_icon.left
+            anchors.rightMargin: 7
+            anchors.top:parent.top
+            font.pixelSize: 14
+            font.family: "微软雅黑"
+            color:"#dbe1ea"
+            text:ptzPanel.name
+            elide:Text.ElideRight			//过长则显示省略号
+
+            MouseArea{
+                anchors.fill: parent
+                hoverEnabled: true
+                onEntered: {
+                    text_1.elide = Text.ElideNone		//鼠标移动至文字上，则显示全部内容
+                }
+                onExited: {
+                    text_1.elide = Text.ElideRight		//鼠标移出文字，则显示省略号
+                }
+            }
+        }

@@ -1,0 +1,46 @@
+import QtQuick 2.5
+import QtQuick.Window 2.2
+
+Window {
+    visible: true
+    width: 640
+    height: 480
+    title: qsTr("Hello World")
+
+
+    Rectangle{
+        height: 300
+        width: 300
+        border.color: "red"
+
+        Text{
+            width: parent.width
+            height:parent.height
+	    text:"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  yyyyyyyyyyyyyyy  zzzzzzzzzzzzzzz  vvvvvvvvvvvvvvv"		
+            font.pixelSize: 20
+            elide:Text.ElideRight
+            wrapMode: Text.Wrap
+//	    wrapMode: Text.WordWrap
+//	    wrapMode: Text.NoWrap
+//	    wrapMode: Text.WrapAnywhere
+        }
+    }
+
+}
+
+
+
+说明1：仅仅在Text的长度总长度超过其width的时候(这里是Text的width，不是其任何外包裹！)，才会需要考虑换行问题。
+
+说明2：主要通过wrapMode来实现换行，此属性有四个可选值
+
+	1. Text.NoWrap (default)  : 不换行 
+
+	2. Text.WordWrap	  : 只认空格和回车，遇到空格和回车，就换行，如果一个字符串没空格和回车，那么这个选项和Text.NoWrap是一样的效果
+					
+	3. Text.Wrap		  : 保证绝对不会越过Text的宽度边界，如果两个段落之和超过width，那么另起一行，两行中多余的部分空格补齐
+
+	4. (*)Text.WrapAnywhere   : 啥都不管，只要超过长度，那就换行，100%纯文本化（不管什么单词不单词，在我看来就是一串字符串）
+
+
+说明3：Label TextEdit Text都有这个属性，有时候可以考虑使用。

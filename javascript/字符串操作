@@ -27,3 +27,8 @@
             var re = new RegExp(regu);
             return re.replace(reg,"");
         }
+
+#4  --  计算字符串中指定字符个数
+	tmptext.length-tmptext.replace(/\./g,'').length		//.的个数(.是特殊字符，需要转义)
+	tmptext.length-tmptext.replace(/a/g,'').length		//a的个数
+
