@@ -1,0 +1,31 @@
+
+
+Qt Quick Controls
+Qt Labs Controls
+Stylable delegates
+Yes
+Yes
+Pre-built native styles
+Yes
+No
+Runtime style changes
+Yes
+Yes
+Can be used on Desktop
+Yes
+Yes *
+Can be used on Mobile
+Yes
+Yes
+Can be used on Embedded
+Yes
+Yes
+Internal event handling
+QML
+C++
+
+Qt Quick Controls were originally developed to support desktop platforms, with mobile and embedded support coming shortly afterwards. They have a very broad scope, in that they provide a styling system flexible enough to allow the development of applications that have either a platform-dependent or platform-independent style.
+On embedded systems, where the hardware has limited resources, this approach can be inefficient. Qt Labs Controls were designed to solve this problem, using benchmarks to guide the development. 
+
+
+
