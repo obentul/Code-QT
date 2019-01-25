@@ -1,0 +1,23 @@
+    QMediaPlayer *tmp = &mediaPlayer;
+    if(tmp->isMetaDataAvailable()){
+        LOG(INFO)<<"XXXX-1";
+        QString title = tmp->metaData(QMediaMetaData::Title).toString();
+        int degrees = tmp->metaData(QMediaMetaData::Orientation).toInt();
+        QString date =  tmp->metaData(QMediaMetaData::Date).toString();
+        LOG(INFO)<<"TITLE --> "<<title.toStdString();
+        LOG(INFO)<<"degrees --> "<<degrees;
+        LOG(INFO)<<"date --> "<<date.toStdString();
+    }
+
+    if(mediaPlayer.isMetaDataAvailable()){
+        LOG(INFO)<<"XXXX-2";
+        QString title = mediaPlayer.metaData(QMediaMetaData::Title).toString();
+        int degrees = mediaPlayer.metaData(QMediaMetaData::Orientation).toInt();
+        QString date =  mediaPlayer.metaData(QMediaMetaData::Date).toString();
+        LOG(INFO)<<"TITLE --> "<<title.toStdString();
+        LOG(INFO)<<"degrees --> "<<degrees;
+        LOG(INFO)<<"date --> "<<date.toStdString();
+    }
+
+
+使用指针，还是使用实例都可以

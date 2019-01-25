@@ -1,0 +1,8 @@
+QGraphicsScene *scene = new QGraphicsScene(this);
+QPushButton *button = new QPushButton();
+button->setText("My cool button");
+
+QGraphicsProxyWidget *w = scene->addWidget(button);
+w->setPos(50, 50);
+w->setRotation(45);
+ui->graphicsView->setScene(scene);
