@@ -1,0 +1,64 @@
+#1 -- 默认的编解码器：
+linux：GStreamer framework
+winodws：DirectShow
+os x：QuickTime
+
+#2 -- 用法
+mediaplayer 可以用来播放 视频/音频/图片 ； 还可以用来 录音/录视频/拍照
+当使用MediaPlayer来播放视频和图片时，需要VideoOutput 作为输出端配合使用(音频不需要)
+
+#3 -- position
+默认情况下，position每秒会更新一次，这样的话，进度条看起来就比较突变，我们可以通过设置mediaplayer的mediaObject.notifyInterval
+属性来设置position的更新间隔，比如
+    Connections {
+        target: player
+        onMediaObjectChanged: {
+            if (player.mediaObject) {
+                player.mediaObject.notifyInterval = 50;
+            }
+        }
+    }
+设置更新间隔为50ms
+
+
+#4 -- autoplay
+autoplay属性未true时，只要mediaplayer的source属性改变，则立刻播放！
+
+
+#5 -- VideoOutput
+VideoOutput组件除了用作辅助MediaPlayer之外，还可以单独用来展示 实时视频流，比如和Camera一起使用，用作摄像头的输出
+import QtQuick 2.5
+import QtMultimedia 5.6
+
+Item {
+    width: 1024
+    height: 600
+
+    VideoOutput {
+        anchors.fill: parent
+        source: camera
+    }
+
+    Camera {
+        id: camera
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

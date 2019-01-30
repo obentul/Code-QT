@@ -1,0 +1,161 @@
+#1 -- alias关键字
+property alias <name>: <reference>
+alias关键字用来将某个组件内的属性，或者某个组件自己，导出给别的组件使用(简单的访问也可以，这里有什么特殊的地方？)
+比如，将组件的内部属性导出给外部域使用？或者让root组件可以访问自己的alias属性？
+
+
+#2 -- 绑定符号(:)和赋值(=)的区别
+如果有下面的语句
+text : n
+那么 text = '' 不会把n给覆盖掉，即text会继续跟着n的改变而改变，为''只是一个临时状态。
+如果 text = n
+那么 text = '' 会覆盖之前的n
+
+  (:)相当于在c++层面做了一次connect
+
+
+#3 -- qml中组件的分类
+qml组件分为两大类：可视的  和  不可视的
+
+Item : 作为所有可视组件的父类，Item为所有可视组件提供基本的图像性质属性(定位，长，宽，可见等等)。
+       但是！Item不是可见的！
+
+Item一般都是为其他多个组件提供一个共同父组件，进而方便一起操作，比如设置定位信息，Item下面的子组件都会这个移动，再比如visible，如果
+想让多个子组件同时消失和出现，那么就可以包一层Item，然后设置Item的visble。
+注：Item在QML编程中更多的是起到批量处理的作用，因为它不可视，但是又具备所有可视化组件的基本信息 
+
+
+#4 -- Rectangle
+Rectangle对Item进行了扩展，增加了一些颜色相关的东西。
+如果一个Rectangle没有设置宽和高，那么它将是不可见的，这种情况多发生在很多Rectangle互相依赖的场景下
+
+注：目前单单依靠Rectangle是无法实现带圆角的渐变色矩形的，需要配合mask蒙版使用，具体见--->如何实现水平渐变色(续---如何加radius)
+
+
+#5 -- Text
+可以使用style 和 styleColor来设置文字的渲染效果
+elide属性可以设置左/中/右。
+Text不提供背景颜色，它所属的父组件时什么颜色，Text的背景色就是什么
+
+注：Text的width属性是可以设置的，但是Height属性设置了意义不大，因为其高度依赖于文本字体和文本长度。
+    所以一般Text可以设置ImplicitHeight
+
+
+#6 -- Image
+Image的文件源可以是本地，也可以是网络地址
+
+注：如果fillmode是PreserveAspectCrop ，那么需要一并设置clip为true，否则图片可能跑到其父组件外面去
+Image对应的c++类为 QQuickImageProvider ，其功能更全
+
+
+#7 -- Components
+Components有多种实现方式：1）写成独立qml，然后直接引用。2）创建Component组件。
+引用Component也有多种方式：1）直接使用qml名字。2）Loader。
+
+写成独立qml时，需要注意，如果想要把某个属性导出去给别人读写，那么这个属性要声明为alias，即取个别名，比如有：
+Rectangle {
+    id: root
+    // export button properties
+    property alias text: label.text	//导出自己的子组件里的label的text给外部使用
+    signal clicked			//导出clicked信号给外部使用
+
+    width: 116; height: 26
+    color: "lightsteelblue"
+    border.color: "slategrey"
+
+    Text {
+        id: label
+        anchors.centerIn: parent
+        text: "Start"
+    }
+    MouseArea {
+        anchors.fill: parent
+        onClicked: {
+            root.clicked()
+        }
+    }
+}
+
+
+#8 -- Simple Transformations
+Item可以translated(坐标定位), rotated(旋转) and scaled(缩放)。
+
+To achieve better visual quality when scaling images it is recommended to scale images down instead of up. Scaling an image up with a larger scaling factor wi
+ll result in scaling artifacts (blurred image). When scaling an image you should consider using `` antialiasing: true`` to enable the usage of a higher qualit
+y filter.
+
+
+#9 -- 布局
+常用布局：Row/Column/Grid/Flow
+
+常常和布局配合使用的是Repeater，It works like a for-loop and iterates over a model. In the simplest case a model is just a value providing the number of loops
+
+
+#10 -- 组件布局
+每个从Item继承的组件，都有六条线：上/下/左/右/垂直/水平  ，anchor动作就是围绕这六条 “线” 进行的。
+
+注：可以对水平和垂直的anchor设置margin，因为对于anchor来说，自己只认识 六条线
+
+注：如果Item是可以drag的，那么drag动作必须服从于anchor。比如anchor了垂直线，那么只能上下移动。
+    因为拖拽一个Item意味着改变x和y，而anchor相对于x和y的改变，更具强制性。优先级更高，所以当x和y改变和anchor改变同时存在时，anchor
+    具备最终话语权
+
+
+#11 -- 键盘输入
+鼠标输入采集，使用MouseArea
+键盘输入采集，使用TextInput和TextEdit
+
+TextInput{
+	id:input1
+	...
+	KeyNavigation.tab: input2
+}
+
+TextInput{
+	id:input2
+	...
+	KeyNavigation.tab: input1
+}
+上面的KeyNavigation.tab表示，当focus在某个input中时，按下tab键时会进行切换，切换至响应的组件
+
+KeyNavigation.tab可以用在各种组件上，而不是仅仅只能用在input中，可以使用它来进行focus的快速切换
+
+
+TextInput只支持在一行中输入，当超过尺寸时，会向后顺延
+TextEdit支持多行输入，当超过尺寸时，会换行
+
+比如我们的聊天输入界面，一般都是TextEdit。而密码和用户名输入界面，一般就是TextInput，应用场景不同
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
