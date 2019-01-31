@@ -1,0 +1,31 @@
+在qml中使用 “有返回值的Q_INVOKABLE函数的时候” ，需要注意：
+
+不能直接在组件内部使用，必须在先封装成一个函数 。 比如：
+
+    MouseArea {
+        anchors.fill: parent
+        onClicked: {
+            obt.log4qml("[x]clicked")
+            obt.log4qml(engine_rootContext_variable)
+            var tmp = obt_VideoPlayerManager.getNewPlayer()
+        }
+    }
+
+上述例子，在运行时会报 Error: Unknown method return type: VideoPlayer*
+需要写成如下：
+
+    MouseArea {
+        anchors.fill: parent
+        onClicked: {
+            obt.log4qml("[x]clicked")
+            obt.log4qml(engine_rootContext_variable)
+            newVpShow()
+
+        }
+    }
+    
+    function newVpShow(){
+        var tmp = obt_VideoPlayerManager.getNewPlayer()
+    }
+
+具体原理尚不知晓....
