@@ -1,0 +1,4 @@
+Log file created at: 2019/01/29 15:33:56
+Running on machine: JQFA000787
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I0129 15:33:56.606884 86928 main.cpp:25] XXX

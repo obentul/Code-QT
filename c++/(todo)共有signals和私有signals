@@ -1,0 +1,1 @@
+QTimer的timeout信号属于私有信号，只能自己emit，别人无法emit
