@@ -1,0 +1,92 @@
+import QtQuick 2.0
+import QtQuick.Layouts 1.2
+import QtQuick.Controls 1.4
+import QtQuick.Controls.Styles 1.4
+
+Rectangle {
+    id:root
+    width: 50
+    height: 50
+    border.width: 2
+    border.color: "#ffffff"
+    color: "transparent"
+    radius: 25
+    opacity : 0.6
+
+    property real minimumValue: 0
+    property real maximumValue: 100
+    property real currentValue: 0
+
+    onMinimumValueChanged: canvas.requestPaint()
+    onMaximumValueChanged: canvas.requestPaint()
+    onCurrentValueChanged: canvas.requestPaint()
+
+    Canvas {
+        id: canvas
+        width: 44
+        height: 44
+        antialiasing: true
+        anchors.centerIn: parent
+
+        property color primaryColor: "transparent"
+        property color secondaryColor: "#ffffff"
+
+        property real centerWidth: width / 2
+        property real centerHeight: height / 2
+        //property real radiuscanvas: Math.min(canvas.width, canvas.height) / 2
+        property real radiuscanvas: Math.min(canvas.width-22, canvas.height-22) / 2
+
+
+
+       // this is the angle that splits the circle in two arcs
+       // first arc is drawn from 0 radians to angle radians
+      // second arc is angle radians to 2*PI radians
+    property real angle: (currentValue - minimumValue) / (maximumValue - minimumValue) * 2 * Math.PI
+
+       // we want both circle to start / end at 12 o'clock
+      // without this offset we would start / end at 9 o'clock
+      property real angleOffset: -Math.PI / 2
+
+       onPrimaryColorChanged: requestPaint()
+       onSecondaryColorChanged: requestPaint()
+
+
+       onPaint: {
+           var ctx = getContext("2d");
+           ctx.save();
+
+           ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // First, thinner arc
+            // From angle to 2*PI
+
+            ctx.beginPath();
+            ctx.lineWidth = 22;
+            ctx.strokeStyle = primaryColor;
+            ctx.arc(canvas.centerWidth,
+                    canvas.centerHeight,
+                    canvas.radiuscanvas,
+                    angleOffset + canvas.angle,
+                    angleOffset + 2*Math.PI);
+            ctx.stroke();
+
+
+            // Second, thicker arc
+            // From 0 to angle
+
+            ctx.beginPath();
+            ctx.lineWidth = 22;
+            ctx.strokeStyle = canvas.secondaryColor;
+            ctx.arc(canvas.centerWidth,
+                    canvas.centerHeight,
+                    canvas.radiuscanvas,
+                    canvas.angleOffset,
+                    canvas.angleOffset + canvas.angle);
+            ctx.stroke();
+
+            ctx.restore();
+        }
+    }
+
+}
+
