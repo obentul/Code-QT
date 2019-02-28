@@ -1,0 +1,11 @@
+Image {
+  id: root
+    Image {
+      id: wheel
+      Behavior on rotation {		//rotation此时将不再突变，而是以每250ms总时间完成一个90度的旋转
+        NumberAnimation {	//NumberAnimatio
+          duration: 250
+        }
+      }
+    }
+}
