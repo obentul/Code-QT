@@ -1,0 +1,31 @@
+应用类型分类：
+
+（--1--）控制台
+编程逻辑和linux下普通程序一样，不再有event loop，也没有app.exec()
+
+（--2--）c++的widget应用
+没有parent的widget都是window
+在main中使用exec来启动event loop
+使用event loop的应用，当且仅当event loop停止时，自己才能停止。换句话说，应用在彻底停止之前，一定会确保event loop已经停止
+
+样例：
+int main(int argc, char ** argv)
+{
+	QApplication app(argc, argv);
+	QScopedPointer<QWidget> widget(new CustomWidget());
+	widget->resize(240, 120);
+	widget->show();
+	return app.exec();
+}
+
+PS:在移动端，动画效果非常重要，像Ainimation相关的类必须全部掌握
+
+
+（--3--）qt quick应用
+基于qml的应用，必须使用view加载一个主qml作为启动入口。
+QQuickView * view = new QQuickView();
+QUrl source = QUrl::fromLocalFile("main.qml");
+view->setSource(source);
+view->show();
+
+ps：qml文件时被送入runtime引擎中运行的，而QQuickView就是这样的runtime引擎

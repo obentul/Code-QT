@@ -1,0 +1,17 @@
+qt quick 2 是基于OpenGL(ES)开发的图形库
+
+像html一样，每个qml文件有且只能有一个root元素
+
+qml不约束root元素的类型，可以使Item，Image，Button等等
+
+image类型会根据source图片的大小自动改变自己的尺寸
+
+id值只限于当前qml中可用，id值一旦设定就不可更改(比如企图通过setproperty来函数来修改已知objectname实例的id)，也就是说，运行时不可更改id值
+
+建议，qml中的顶层元素的id为root
+
+qml也是遵从图层原则，child的图层在parent之上，当把child移除或者invisible，parent就显示完全了
+
+
+
+

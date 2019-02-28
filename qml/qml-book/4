@@ -1,0 +1,135 @@
+#1 ==================================================================================================================
+有关id ：id既不能被修改，也不能被查询，即使知道objectname，也不能反查其在qml中的id
+
+#2 ==================================================================================================================
+如果属性在初始化时指定了其他属性，则会自动形成binding，当其他属性变化时，该属性跟着变。建立binding相当于建立信号槽机制
+
+#3 ==================================================================================================================
+可以给某个组件增加自定义属性，使用  property <type> <name> : <value>  
+
+#4 ================================================================================================================== 
+(*)
+除了3）可以定义属性外，还可以通过 property alias <name>: <reference> 来定义一个属性，这里有区别，首先多出来alias关键字
+   其次，不需要指定属性的type，属性的type将自动由reference设置。
+
+
+   （*）最后也是最重要的，这个语法的作用是把当前属性声明文当前qml文件全局可见。这个动作在qml内部没什么作用，因为qml文件
+	内部各个组件之间本就可以互相访问对方的属性。但是在把qml作为component使用时，就很有用了。如果不指定为alias，那么
+	就无法访问相关属性。比如有mybutton.qml，其中属性myname，如果不是alias，那么在其他qml中使用mybutton的时候就不能
+	使用myname属性
+
+    (**) 根本原因在于，一个qml文件中，只有根元素的属性才能被其他文件访问。
+
+
+#5 ==================================================================================================================
+qml中的冒号“:”会有隐藏的含义，那么就是binding动作。而javascript的等号“=”不会做这样的动作，代表的就是一次赋值
+	
+	某个属性的当前binding会在下一次binding时被替换，或者在下一次等号“=”赋值时被取消。(逻辑很好理解，就是替换关系)
+	比如:
+		text:parent.height
+	如果：
+		text=''
+	则：
+		text不再跟着parent的高度改变而改变
+
+	ps:任何对binding左侧的动作都将强制解除binding，比较脆弱
+
+#6 ==================================================================================================================
+qml中的元素分为 可见 和 不可见
+
+可见的在屏幕上可以看见，作用在于呈现
+不可见的，一般都是写功能性的，作用在于维护可见组件
+
+#7 ==================================================================================================================
+Item虽然不可见，但是是所有可见组件的父类，即Item在paintevent中什么都不做，但是定义了所有属性。比如：
+
+Geometry 
+x and y to define the top-left position, width and height for the expansion of the
+element and also the z stacking order to lift elements up or down from their natural
+ordering
+
+Layout handling 
+anchors (left, right, top, bottom, vertical and horizontal center) to position elements
+relative to other elements with their margins
+
+Key handling 
+attached Key and KeyNavigation properties to control key handling and the input
+focus property to enable key handling in the first place
+
+Transformation 
+scale and rotate transformation and the generic transform property list for x,y,z
+transformation and their transformOrigin pointTransformation scale and rotate transformation and the generic transform property list for x,y,z
+transformation and their transformOrigin point
+
+Visual 
+opacity to control transparency, visible to show/hide elements, clip to restrain
+paint operations to the element boundary and smooth to enhance the rendering quality
+
+State 
+definition states list property with the supported list of states and the current state property
+as also the transitions list property to animate state changes.
+
+#8 ==================================================================================================================
+rectangle如果不设置width和height的话，就是invisible
+
+圆角渐变色目前不支持，但是可以通过增加蒙版来实现，具体参考qml目录
+
+
+#9 ==================================================================================================================
+Text只显示文字，没有任何背景啥的
+Text的height和width都是跟着内容变的，不能人为设置。
+
+#10 ==================================================================================================================
+如果图片的尺寸超过其parent，那么要么放任他超出，如果想约束(超出部分会被裁掉)，那么指定clip为true
+
+
+#11 ==================================================================================================================
+MouseArea 是一块长方形的Item
+
+#12 ==================================================================================================================
+components 是可复用的组件。可以理解为component是类，其存在于qml中并不代表任何实例，比如一个component里面有rectangle，如果不
+使用loader来加载，它也不可见。
+
+按照上面的解释，qml文件不加载也不可见，那么qml也属于componet
+
+PS：把component作为某个qml的root是无意义的。因为qml文件本身就是component
+
+#13 ==================================================================================================================
+一般情况下，使用Item作为根元素，主要原因在于Item的API最少，不具备任何特性，而且没有颜色之类的属性，简言之就是最精简。
+实际情况下，视需求而定。
+
+#14 ==================================================================================================================
+anchor是Item的属性，所有继承Item的组件都可使用
+
+（*）anchor的优先级高于x，y，width和height
+	如果某个组件anchor了别的组件，而且是可以拖动的，就会发现只能在确保anchor的前提下被拖动
+
+
+#15 ==================================================================================================================
+TextInput
+
+validator用来验证输入，不符合条件的不予采纳
+
+
+#16 ==================================================================================================================
+自定义qml组件的时候，务必使用大写字母开头，否则用不起来，不知道为什么
+
+
+#17 ==================================================================================================================
+4.7.2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
