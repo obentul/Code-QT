@@ -1,0 +1,20 @@
+Grid{
+anchors.fill: parent
+anchors.margins: 8
+spacing: 4
+	Repeater {
+		model: 16
+		Rectangle {
+			width: 56; height: 56
+			property int colorIndex: Math.floor(Math.random() * 3)
+			color: root.colorArray[colorIndex]
+			border.color: Qt.lighter(color)		//颜色比当前颜色淡一点
+			
+			Text {
+				anchors.centerIn: parent
+				color: "#f0f0f0"
+				text: "Cell " + index
+			}
+		}
+	}
+}

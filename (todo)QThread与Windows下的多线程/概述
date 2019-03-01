@@ -1,0 +1,105 @@
+#1 线程的创建===================================================================================================
+
+在qt中，有两种使用线程的方式：
+1）把某个类的实例(必须是继承QObject类)通过调用moveToThread方法导入到一个QThread实例中。
+   这个方法和linux c有点类似，都是通过调用一个接口，把某个函数/类丢入线程处理函数中。
+   
+	moveToThread是QObject类的public函数，只接受一个参数，就是容器线程。
+
+	
+	案例
+
+		class Worker : public QObject
+		{
+			Q_OBJECT
+		
+			public slots:
+				void doWork(const QString &parameter) {
+					QString result;
+					/* ... here is the expensive or blocking operation ... */
+					emit resultReady(result);
+				}
+			
+			signals:
+				void resultReady(const QString &result);
+		};
+		
+		class Controller : public QObject
+		{
+			Q_OBJECT
+			QThread workerThread;
+			public:
+				Controller() {
+					Worker *worker = new Worker;
+					worker->moveToThread(&workerThread);
+					connect(&workerThread, &QThread::finished, worker, &QObject::deleteLater);
+					connect(this, &Controller::operate, worker, &Worker::doWork);
+					connect(worker, &Worker::resultReady, this, &Controller::handleResults);
+					workerThread.start();
+				}
+				~Controller() {
+					workerThread.quit();
+					workerThread.wait();
+				}
+			public slots:
+				void handleResults(const QString &);
+			signals:
+				void operate(const QString &);
+		};
+
+
+2）继承QThread类，重写run()函数
+	这个方法比较简单，只需要把想要做的动作放到run函数中就可以了
+	
+		class WorkerThread : public QThread
+		{
+			Q_OBJECT
+			void run() Q_DECL_OVERRIDE {
+				QString result;
+				/* ... here is the expensive or blocking operation ... */
+				emit resultReady(result);
+			}
+		signals:
+			void resultReady(const QString &s);
+		};
+		
+		void MyObject::startWorkInAThread()
+		{
+			WorkerThread *workerThread = new WorkerThread(this);
+			connect(workerThread, &WorkerThread::resultReady, this, &MyObject::handleResults);
+			connect(workerThread, &WorkerThread::finished, workerThread, &QObject::deleteLater);
+			workerThread->start();
+		}
+	
+
+	PS；使用这种方法将无法使用event loop系统，且QThread实例(例子中的workerThread)依旧在主线程中，即实例和线程是分离的。相当于
+	    线程类的实例在主线程中，这种情况下，如果子线程想要使用QThread实例的信号，就不行了。
+	    也就是说在run函数里面不能connect workerThread的所有信号。因为run已经属于子线程管辖了。
+
+	这种方法的特点就是，子线程实例是父线程的一个变量，run方法是子线程实例的一个方法。如果有一个全局变量，那么就要考虑这个变量的
+	竞争问题，因为在run中访问这个全局变量和父线程中访问这个全局变量是在两个线程中。
+
+
+
+
+
+#2 线程的管理===================================================================================================
+线程实例的启停都会对外发信号。
+
+推荐为线程的finished信号注册一个槽函数，用来清理内存
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
