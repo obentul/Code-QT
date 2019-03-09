@@ -18,3 +18,5 @@ MyWindow	:	c++类的类名
 				id:mywindow_1
 			     }
 
+
+(!!!)注意：第四个参数  一定！！！ 要是“大写开头”，否则在qml中使用就会提示  ReferenceError: "x" is not defined
