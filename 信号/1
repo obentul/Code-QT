@@ -1,2 +1,8 @@
 private私有信号只能有实例自己内部方法emit，不能显式emit。
 
+
+私有信号的定义：
+
+
+Q_SIGNALS:
+    void timeout(QPrivateSignal);
