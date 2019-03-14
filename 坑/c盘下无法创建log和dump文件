@@ -1,0 +1,11 @@
+使用非管理员用户运行安装在c盘下的软件时，无法创建log文件盒dump文件。
+
+
+原因：没有获得UAC权限
+
+
+windows下，在qt工程文件pro中增加
+MAKE_LFLAGS += /MANIFESTUAC:\"level=\'requireAdministrator\' uiAccess=\'false\'\"
+同时需要打开UAC
+
+如果是在vs环境下，则在编译选项中找到UAC控制，设置为requireAdministrator 和 false即可
