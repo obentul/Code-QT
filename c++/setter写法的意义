@@ -1,0 +1,14 @@
+一般setter都会写成如下：
+
+void setValue(int arg){
+	if(arg!=m_value)
+	{
+		m_value = arg;
+		emit valueChanged(arg);
+	}
+}
+
+
+这里的if判断，咋一看好像用处不大，其实在ui编程中，这个判断至关重要，它可以有效防止“互相触发导致的死循环”。
+
+因为很多情况下value既作为信号的接受者，也可能作为信号的发送者，如果不做判断，那么就可能造成循环自激励，导致死循环
