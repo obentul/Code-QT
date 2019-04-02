@@ -1,0 +1,3 @@
+sheetstyle 既可以用在QApplication上，也可以用在QWidget上。
+
+

@@ -1,0 +1,18 @@
+StackLayout ： 堆栈式布局，栈中有N个组件，只显示栈顶的组件。通过currentIndex来控制哪个组件显示
+
+
+默认情况下，子Item的 Layout.fillWidth and Layout.fillHeight 是true的，即是填充满StackLayout尺寸的，除非使用Layout.maximumWidth or Layout.maximumHeight
+来约束尺寸。
+
+
+Items in a StackLayout support these attached properties:
+Layout.minimumWidth
+Layout.minimumHeight
+Layout.preferredWidth
+Layout.preferredHeight
+Layout.maximumWidth
+Layout.maximumHeight
+Layout.fillWidth
+Layout.fillHeight
+
+currentIndex从 0 开始，-1代表为空
