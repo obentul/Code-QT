@@ -1,0 +1,31 @@
+如果在类中需要使用其他类的指针作为私有变量，那么要么include相应头文件，要么前置声明一下。
+
+include头文件会加重编译负担，建议前置声明
+
+但是，如果是要使用其他类的实例，那么就必须include。
+
+
+
+class QPushButton;
+
+class myQWidget:public QWidget{
+
+...
+
+QPushButton *myButton;
+...
+
+}
+
+
+
+#include <QPushButton>
+
+class myQWidget:public QWidget{
+
+...
+
+QPushButton myButton;
+...
+
+}
