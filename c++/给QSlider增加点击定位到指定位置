@@ -1,0 +1,49 @@
+如果想改变某个类的现有事件处理逻辑，那么有两种方法：
+
+1）继承并重写
+2）为当前类实例安装事件过滤器，使用installEventFilter
+
+
+	slider=new QSlider(this); 
+
+	slider->installEventFilter(this);
+
+bool trayIconMenu::eventFilter(QObject *obj, QEvent *event)
+
+{
+
+    if(obj==slider)
+
+    {
+
+        if (event->type()==QEvent::MouseButtonPress)           //判断类型
+
+        {
+
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+
+            if (mouseEvent->button() == Qt::LeftButton)	//判断左键
+
+            {
+
+               int dur = slider->maximum() - slider->minimum();
+
+               int pos = slider->minimum() + dur * ((double)mouseEvent->x() / slider->width());
+
+               if(pos != slider->sliderPosition())
+
+                {
+
+                  slider->setValue(pos);
+
+                }
+
+            }
+
+        }
+
+    }
+
+    return QObject::eventFilter(obj,event);
+
+}
