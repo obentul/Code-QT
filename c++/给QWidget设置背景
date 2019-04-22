@@ -1,0 +1,2 @@
+    m_container->setAttribute(Qt::WA_StyledBackground);
+    m_container->setStyleSheet("background-color: black");
