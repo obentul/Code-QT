@@ -1,0 +1,9 @@
+（*）每个数据库链接只能支持一个事务。
+所以如果想创建多个互不干涉的事务，就必须创建多个数据库链接，通过 addDatabase函数来实现
+
+比如：我想创建多个sqlite事务，这些事务操作相同的数据库，那么可以 
+
+QSqlDataBase db1 = QSqlDatabase::addDatabase("QSQLITE","TRANSACTION1");
+QSqlDataBase db2 = QSqlDatabase::addDatabase("QSQLITE","TRANSACTION2");
+
+
