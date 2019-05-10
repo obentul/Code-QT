@@ -1,0 +1,16 @@
+#1 ==========================================================================================
+
+从Component创建实例有两种方式： createObject  incubateObject
+
+object createObject(QtObject parent, object properties)
+object incubateObject(Item parent, object properties, enumeration mode)
+
+如果createObject希望获得的实例希望是可见的，那么必须制定parent参数，或者为实例制定parent
+
+createObject会导致UI阻塞
+incubateObject创建实例是异步的，不会导致UI阻塞
+
+
+#2 ==========================================================================================
+
+
