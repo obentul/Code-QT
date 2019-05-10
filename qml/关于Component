@@ -3,3 +3,37 @@ Component相当于只声明和定义，但是不实例化，必须使用相关�
 可用加载器：Loader Repertor 
 
 每一个qml都是一个Component，所以只有一个在别的qml中使用某个qml的名字来创建组件时，qml才会实例化
+
+Component不继承自Item，所以不能使用anchor属性
+
+Component在定义的时候，只能有一个直接子元素，这个子元素必须是Item或者继承自Item的，且最多只能有一个id属性
+
+
+
+
+Component {
+
+	id:comp			//最多只能有一个属性id
+	
+	Rectangle {		//只能有一个直接子元素，且必须继承自Item
+		
+		...
+
+	}
+
+}
+
+
+//构造开始
+Component.onCompleted:{
+
+	...
+
+}
+
+//析构开始
+Component.onDestruction:{
+
+	...
+
+}
