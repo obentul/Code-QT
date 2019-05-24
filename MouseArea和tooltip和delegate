@@ -5,6 +5,11 @@
 所有可见组件的左上角都是(0,0)。所以如果在delegate中使用，就必须保证delegate的所有内容都在一个MouseArea包裹中，这样才能有效地
 使用这个MouseArea。
 
+PS : 为了方便操作，建议使用Rectangle作为delegate的直接子Item，然后再使用MouseArea作为Rectangle的直接子Item，其他内容全部以
+     MouseArea作为parent。
+
+	Rectangle用来描述整个条目的外观
+        MouseArea用来管理整个条目的 坐标系 和 鼠标事件
 
 例子：
 
