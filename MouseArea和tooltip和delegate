@@ -1,0 +1,191 @@
+当为ListView/TreeView等包含列表的数据增加自定义tooltip的时候，就设计到如何定位这个tooltip的问题。
+
+
+如果想获取当前鼠标所在位置的x 和 y，可以使用 mouseX 和 mouseY。而这两个属性是MouseArea特有的，又每个组件都有自己的x-y坐标系，即
+所有可见组件的左上角都是(0,0)。所以如果在delegate中使用，就必须保证delegate的所有内容都在一个MouseArea包裹中，这样才能有效地
+使用这个MouseArea。
+
+
+例子：
+
+    Component {
+        id:taskListDelegate
+        Rectangle{
+            id:wrapper
+            width:parent.width
+            height: 69
+            property TaskInfo currentItem : taskinfo
+            property int  taskState : taskstate
+            property bool isSelected:taskList.currentIndex === index ? true : false
+            color: isSelected?"#3F8FD0":"#1C2D48"
+            MouseArea {
+                  id:delegate_ma
+                  anchors.fill: parent;
+                  acceptedButtons: Qt.LeftButton|Qt.RightButton
+                  hoverEnabled: true
+                  propagateComposedEvents: true
+                  onClicked:{
+                      taskList.currentIndex = index
+                      myTaskCommand.setCurrentTaskId(currentItem.taskId)
+                      myMDCCommand.queryTaskPointHttpReq(currentItem.taskId,queryTaskPointHttpCB)
+                  }
+                  onPositionChanged: {
+                      tooltip_task.visible = false
+                      hoverTimer.start()
+                  }
+                  onEntered: {
+                      hoverTimer.start()
+                  }
+                  onExited: {
+                      tooltip_task.visible = false
+                      hoverTimer.stop()
+                  }
+
+
+                  Timer{
+                      id:hoverTimer
+                      interval: 1500
+                      onTriggered:{
+                          tooltip_task.tip = ""
+                          var name = myMDCCommand.Language?"名称：":"name:";
+                          var duration = myMDCCommand.Language?"有效期：":"duration:";
+                          tooltip_task.tip = name + currentItem.taskName + "\n" + duration + currentItem.startTimeList
+                                       + " ~ " + currentItem.stopTimeList
+                          tooltip_task.x = parent.mouseX
+                          tooltip_task.y = parent.mouseY
+                          tooltip_task.visible = true
+                      }
+                  }
+
+                  Rectangle{
+                      id: tooltip_task
+                      border.color: "#767676"
+                      radius: 3
+                      color: "#EBEEEF"
+                      width: tooltipText_task.width + 12
+                      height: tooltipText_task.height + 8
+                      visible: false
+                      property string tip: ""
+                      z:300
+                      Label {
+                          id: tooltipText_task
+                          anchors.centerIn: parent
+                          text: tooltip_task.tip
+                          wrapMode:Text.Wrap
+                          font.family: myMDCCommand.Language?"微软雅黑":"Arial"
+                          font.pixelSize: 14
+                          color:"#212a44"
+                          onContentWidthChanged: {
+                              if (contentWidth > 150)
+                              {
+                                  width = 150
+                              }
+                              else{
+                                  width = contentWidth
+                              }
+                          }
+                      }
+                  }
+
+                  Label{//任务名
+                      id:taskname
+                      anchors.top: parent.top
+                      anchors.topMargin: 8
+                      anchors.left: parent.left
+                      anchors.leftMargin: 8
+                      width: 200
+                      text:currentItem.taskName
+                      font.family: myMDCCommand.Language?"雅黑":"Arial"
+                      font.pixelSize: 14
+                      elide: Text.ElideRight
+                      color:isSelected?"#d2dee9":"#aebdcd"
+                      z:299
+                  }
+
+                  Label{//起止时间
+                      id:timeduration
+                      anchors.bottom: parent.bottom
+                      anchors.bottomMargin: 8
+                      anchors.left: parent.left
+                      anchors.leftMargin: 8
+                      width: 200
+                      text:currentItem.startTimeList+ "~" +currentItem.stopTimeList
+                      font.family: myMDCCommand.Language?"雅黑":"Arial"
+                      font.pixelSize: 12
+                      elide: Text.ElideRight
+                      color:isSelected?"#d2dee9":"#aebdcd"
+                      z:299
+                  }
+
+                  Rectangle{//编辑按键
+                      id:editBtn
+                      anchors.top:parent.top
+                      anchors.right: removeBtn.left
+                      height: parent.height
+                      width: 25
+                      color:"#396088"
+                      visible: isSelected?true:false
+                      z:299
+
+                      Image{
+                          anchors.verticalCenter: parent.verticalCenter
+                          anchors.horizontalCenter: parent.horizontalCenter
+                          source:"qrc:/images/elecFence/icon18px_edit.png"
+                      }
+
+                      MouseArea{
+                          id:ma_edit
+                          anchors.fill: parent
+                          propagateComposedEvents:false
+
+                          onClicked: {
+                              mouse.accepted = true
+                              if(currentItem.taskCreator!==myMDCCommand.userName){
+                                  myMDCCommand.showWarningInfo(myMDCCommand.Language?"任务创建者不是当前调度员,无法编辑任务":"Task does not belong to current dispatcher,modify is forbidden")
+                                  return;
+                              }
+                              myTaskCommand.showtaskManagerEdit(currentItem.taskId)
+                          }
+                      }
+                  }
+
+                  Rectangle{//删除按键
+                      id:removeBtn
+                      anchors.top: parent.top
+                      anchors.right: parent.right
+                      height: parent.height
+                      width: 25
+                      color:"#CF5252"
+                      visible: isSelected?true:false
+                      z:299
+
+                      Image{
+                          anchors.verticalCenter: parent.verticalCenter
+                          anchors.horizontalCenter: parent.horizontalCenter
+                          source:"qrc:/images/map/tree_list_del_n.png"
+                      }
+
+                      MouseArea{
+                          id:ma_remove
+                          anchors.fill: parent
+                          propagateComposedEvents:false
+                          onClicked: {
+                              mouse.accepted = true
+                              if(currentItem.taskCreator!==myMDCCommand.userName){
+                                  myMDCCommand.showWarningInfo(myMDCCommand.Language?"任务创建者不是当前调度员,无法删除任务":"Task does not belong to current dispatcher,remove is forbidden")
+                                  return;
+                              }
+                              var ret = myMDCCommand.removeTaskHttpReq(currentItem,removeTaskHttpCB)
+                              if(ret === -1){
+                                  utility.log4qml("server error,remove task error")
+                                  return;
+                              }
+
+                              myTaskCommand.removeTask(currentItem.taskId)  //删除底层数据
+                              taskModel.remove(index)     //删除View里面的条目
+                          }
+                      }
+                  }
+            }
+        }
+    }
