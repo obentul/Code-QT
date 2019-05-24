@@ -13,6 +13,7 @@ PS : 为了方便操作，建议使用Rectangle作为delegate的直接子Item，
 
 例子：
 
+
     Component {
         id:taskListDelegate
         Rectangle{
@@ -23,15 +24,24 @@ PS : 为了方便操作，建议使用Rectangle作为delegate的直接子Item，
             property int  taskState : taskstate
             property bool isSelected:taskList.currentIndex === index ? true : false
             color: isSelected?"#3F8FD0":"#1C2D48"
+            z:delegate_ma.isEntered?301:300
             MouseArea {
                   id:delegate_ma
                   anchors.fill: parent;
                   acceptedButtons: Qt.LeftButton|Qt.RightButton
                   hoverEnabled: true
                   propagateComposedEvents: true
+                  property bool isEntered:tooltip_task.visible
+                  //containsMouse:true
                   onClicked:{
                       taskList.currentIndex = index
                       myTaskCommand.setCurrentTaskId(currentItem.taskId)
+                      console.log("currentItem.taskname:"+currentItem.taskName)
+                      console.log("currentItem.taskId:"+currentItem.taskId)
+                      console.log("currentItem.taskState:"+currentItem.taskState)
+                      console.log("currentItem.taskCreator:"+currentItem.taskCreator)
+                      console.log("currentItem.startTimeList:"+currentItem.startTimeList)
+                      console.log("currentItem.stopTimeList:"+currentItem.stopTimeList)
                       myMDCCommand.queryTaskPointHttpReq(currentItem.taskId,queryTaskPointHttpCB)
                   }
                   onPositionChanged: {
