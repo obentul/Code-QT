@@ -1,0 +1,31 @@
+i    function analyseStartTimeList(timelist){
+
+        console.log("timelist -> "+timelist)
+        var timearray = timelist.split(",")
+        var len = timearray.length
+        console.log("len -> "+len)
+        for(var i=0;i<len;i++){
+            switch(i+1){
+                case 1:
+                    starttime1.text = timearray[i]
+                    timepair1vis = true
+                    break;
+                case 2:
+                    starttime2.text = timearray[i]
+                    timepair2vis = true
+                    break;
+                case 3:
+                    starttime3.text = timearray[i]
+                    timepair3vis = true
+                    break;
+                case 4:
+                    starttime4.text = timearray[i]
+                    timepair4vis = true
+                    break;
+                case 5:
+                    starttime5.text = timearray[i]
+                    timepair5vis = true
+                    break;
+            }
+        }
+    }
