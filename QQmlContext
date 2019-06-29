@@ -1,0 +1,8 @@
+QQmlContext相当于QQmlEngine的上下文集合，engine有rootcontext，相当于全局变量，也可以
+创建新的context，给engine使用。
+
+context需要手动释放，如果engine被释放了， 但是context还不会被释放，需要手动 free
+
+子context 中的同名属性 会覆盖父context。
+
+

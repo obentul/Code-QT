@@ -1,0 +1,20 @@
+qqmlengine全权管理qml文件的实例化 、qml实例 、 qml实例的上下文 、 qml组件之间的层级父子关系等等
+
+所有的qml文件/组件，想要实例化，都要指定一个 qmlengine  。
+
+qmlcontext也由 engine 管理。 context 和 qml实例 同属于 engine管理。
+
+一个程序可以有多个 engine
+ 如果这样的话， 属于不同engine 的 qml实例该如何沟通？？
+不同engine的context能否互相共享？？
+
+
+每个engine都有一个ObjectOwnership属性，用来指明属于本engine的所有实例在什么时候被销毁。
+
+QQmlEngine的构造函数可接受一个QObject指针值。
+
+QQmlEngine的析构会使所有context失效，但是不会释放。释放步奏见QJSEngine
+
+setNetworkAccessManagerFactory可以为当前engine设置一个网络接入工厂，但是这个设置必须在engine启动之前
+
+

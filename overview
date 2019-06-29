@@ -1,0 +1,14 @@
+Qt Widget  体系用的desktop领域，Qt Quick用在移动端
+
+数据可视化：Qt Charts and {Qt Data Visualization}
+
+web融合 ：Chromium-based WebEngine layout engine ， The engine can be integrated into both Qt Widget-based and Qt Quick-based applications.
+
+
+
+和qml相关的c++类：
+QQmlAbstractUrlInterceptor  ：  qml 拦截器，用来控制qml文件的加载
+
+qmlengine ： qml文件的实例化场所。
+	     
+
