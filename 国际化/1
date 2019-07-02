@@ -112,13 +112,44 @@ Qt Linguist 的 使用
 
 Linguist会遍历ts文件，同时在源码中找到所有使用tr函数的地方，然后在“sources an forms”中展示出来
 
+#9     ========================================================================================================
+
+前面提到了如何在应用程序中开启 翻译模块 ， 其中提到了一个关键的类  -->  QTranslator
+
+一个QTranslator实例中包含了一组ts文件，每一个文件都是“ 一种语言对应另一种语言 ”的对应模式。因此，如果希望
+当前应用程序可以使用多种翻译，那么可以把所有qm文件都注册到实例中，然后根据需要切换。
+
+QTranslator提供接口来检索qm文件和读取需要的值.
+
+用法如下：
+
+  int main(int argc, char *argv[])
+  {
+      QApplication app(argc, argv);
+
+      QTranslator translator;
+      // look up e.g. :/translations/myapp_de.qm
+      if (translator.load(QLocale(), QLatin1String("myapp"), QLatin1String("_"), QLatin1String(":/translations")))
+          app.installTranslator(&translator);
+
+      QPushButton hello(QCoreApplication::translate("main", "Hello world!"));
+      hello.resize(100, 30);
+
+      hello.show();
+      return app.exec();
+  }
+
+
+注意：QTranslator实例必须在需要使用翻译的widget前面创建
 
 
 
 
+（*）当把多个翻译文件install一个应用中时，最后添加的那个将会作为首选项，如果没找到，则向前推，一直到第一个install
+     的翻译文件位置，如果第一个也没有，则使用原来的字符串
 
-
-
+	技巧：可以先removeTranslator某个翻译文件，再isntallTranslator这个翻译文件，以把它放到队列的尾部，从而
+              成为最先被查询的翻译文件  （先进后出的原则，和栈一样）
 
 
 
