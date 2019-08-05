@@ -32,3 +32,5 @@
 	tmptext.length-tmptext.replace(/\./g,'').length		//.的个数(.是特殊字符，需要转义)
 	tmptext.length-tmptext.replace(/a/g,'').length		//a的个数
 
+
+
