@@ -1,0 +1,5 @@
+无界面的应用 ：必须使用QCoreApplication
+
+有界面的应用 ：可使用QGuiApplication
+
+如果使用Qt Widget模块 ：使用QApplication

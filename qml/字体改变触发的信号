@@ -1,0 +1,30 @@
+  Text {
+      onFontChanged: console.log("font changed")
+
+      Text { id: otherText }
+
+      focus: true
+
+      // changing any of the font attributes, or reassigning the property
+      // to a different font value, will invoke the onFontChanged handler
+      Keys.onDigit1Pressed: font.pixelSize += 1
+      Keys.onDigit2Pressed: font.b = !font.b
+      Keys.onDigit3Pressed: font = otherText.font
+  }
+
+
+ps:字体整体改变会触发信号，但是字体的个别属性不会触发
+
+
+  Text {
+      // invalid!
+      onFont.pixelSizeChanged: doSomething()
+
+      // also invalid!
+      font {
+          onPixelSizeChanged: doSomething()
+      }
+
+      // but this is ok
+      onFontChanged: doSomething()
+  }

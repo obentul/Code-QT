@@ -1,0 +1,47 @@
+如果使用insert动作，那么对相同的key进行insert会替换原来的value值。
+比如：key1 --- value1
+      key2 --- value2
+
+
+
+如果使用insertmulti动作，那么会再创建一个相同的key，然后建立key-value对。
+比如：key1 --- value1
+      key1 --- value2
+
+
+小结：其实QMap的唯一键并不是key。而是可以重复的
+
+
+
+进阶：如果我想向下面这样使用，QMap能否满足？
+
+	key1 --- value1
+	      |- value2
+        key2 --- value3
+              |- value4
+              |- value5
+
+答案是可以的！  只要对key进行遍历即可， 这里有两个方法 keys 和 uniquekeys。
+
+keys返回的会是全量数据，即会有重复key的现象，比如如果使用insertmulti增加了10个key1，那么遍历keys的列表将会返回10个key1
+
+uniquekeys返回的是唯一化后的数据，即10个一样的key，返回的只有一个，这个时候再遍历 当前key对应的值，即可完成上述的树形结构遍历了。
+
+
+
+案例：
+
+
+void ResLocCommand::printRelationMap(){
+    QList<QString> mapkeys(m_relationMap.uniqueKeys());
+    LOG(INFO)<<m_relationMap.uniqueKeys().size();
+    foreach (QString tmpkey, mapkeys) {
+        LOG(INFO)<<"key-> "<<tmpkey.toStdString();
+        QList<QString> tmp = m_relationMap.values(tmpkey);
+        foreach(QString tmpvalue,tmp){
+            LOG(INFO)<<tmpvalue.toStdString();
+        }
+    }
+}
+
+（！）小结：QMap是不会存储树形结构的，但是可以通过使用uniquekeys方法来实现 “树形遍历”

@@ -1,0 +1,1 @@
+endtime5.text = new Date().toLocaleString(Qt.locale(),"yyyy-MM-dd hh:mm:ss")

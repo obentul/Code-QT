@@ -1,0 +1,96 @@
+#1  ===================================================================================================
+
+TARGET  :  指定编译输出文件名称，后缀由平台决定，如果不指定这个参数，那么输出 和 pro文件同名。
+
+#2  ===================================================================================================
+
+--- 解析pro文件，生成makefile ---
+
+qmake -o Makefile hello.pro
+
+
+--- 生成可调式版本 ---
+
+CONFIG += debug
+
+
+--- 分拆平台独立的代码 ---
+
+hellowin.cpp仅在win32环境下才会被编译
+
+win32{
+   SOURCES += hellowin.cpp
+}
+
+unix{
+   SOURCES += hellounix.cpp
+}
+
+	注：这里可以推广至一个用法，大括号括起来的部分，仅仅在前面的条件满足时，才会被处理并写入
+	    Makefile中。
+       （*）PS：需要明确知道有多少个类似于win32这样的条件，比如还有lupdate_only
+
+
+--- 文件筛查 及 qmake的执行退出 ---
+
+!exists(main.cpp){		
+    error( "main.cpp does not exist , end qmake , makefile will not be produced" )
+}
+
+exists()函数用来检测文件是否存在
+error()在答应字符串后，“退出”qmake的执行！！！
+
+exists()函数如何接受文件列表参数，而不是仅仅接受一个文件名。比如接受 SOURCES 内置变量的值
+
+
+--- 开启qDebug 以便在console中输出日志 ---
+
+CONFIG += console
+
+
+#3  ===================================================================================================
+
+example：
+  CONFIG += debug				#把调试信息编译进二进制文件，以便调试工具访问
+  HEADERS += hello.h				
+  SOURCES += hello.cpp
+  SOURCES += main.cpp
+  win32 {					#仅win32环境下，编译hellowin.cpp
+      SOURCES += hellowin.cpp
+  }
+  unix {
+      SOURCES += hellounix.cpp			#仅unix环境下，编译hellounix.cpp
+  }
+  !exists( main.cpp ) {				
+      error( "No main.cpp file found" )		#如果main.cpp不存在，则终止qmake，makefile不会生成
+  }
+  win32:debug {					#仅在win32环境下，同时在debug模式下，才使用控制台输出
+      CONFIG += console
+  }
+
+
+win32:debug{
+
+}
+
+也可写作
+
+win32{
+   debug{
+
+   }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,8 @@
+qt中的插件其实就是动态库，只不过qt会对这个动态库增加一定的包装，以使其能够适应qt运行环境。
+
+这就好像windows下编写动态库需要使用
+__declspec(dllexport)
+__declspec(dllimport)
+
+
+而linux需要任何修饰

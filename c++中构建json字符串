@@ -1,0 +1,39 @@
+    QList<QString> mapkeys(m_relationMap.uniqueKeys());
+    foreach (QString tmpkey, mapkeys) {
+        if(tmpkey == id){
+            QList<QString> tmp = m_relationMap.values(tmpkey);
+            foreach(QString tmpvalue,tmp){
+                QJsonObject jsonitem;
+                LocInfo* tmplocinfo = m_LocMap.value(tmpvalue);
+                QString longitudeType = tmplocinfo->longitudeType();
+                QString longitude = tmplocinfo->longitude();
+                QString latitudeType = tmplocinfo->latitudeType();
+                QString latitude = tmplocinfo->latitude();
+                QString icon = m_ResMap.value(id)->icon();
+                jsonitem.insert("longitudeType",longitudeType);
+                jsonitem.insert("longitude",longitude);
+                jsonitem.insert("latitudeType",latitudeType);
+                jsonitem.insert("latitude",latitude);
+                jsonitem.insert("icon",icon);
+                jsonArray.append(jsonitem);
+                QString debug_str(QJsonDocument(jsonitem).toJson(QJsonDocument::Compact));
+                LOG(INFO)<<"debug_str:"<<debug_str.toStdString();
+            }
+        }else{
+            LOG(INFO)<<"xxxxxxxxx";
+        }
+    }
+
+    jsonArray_str = QJsonDocument(jsonArray).toJson(QJsonDocument::Compact);
+    ret_json.insert("data",jsonArray_str);
+    QString ret_str(QJsonDocument(ret_json).toJson(QJsonDocument::Compact));
+    LOG(INFO)<<"ret_str:"<<ret_str.toStdString();
+
+
+
+
+debug_str:{"icon":"default","latitude":"41.9896","latitudeType":"0","longitude":"128.775","longitudeType":"0"}
+
+ret_str:{"data":"[{\"icon\":\"default\",\"latitude\":\"41.9896\",\"latitudeType\":\"0\",\"longitude\":\"128.775\",\"longitudeType\":\"0\"},{\"icon\":\"default\",\"latitude\":\"31.9896\",\"latitudeType\":\"0\",\"longitude\":\"118.775\",\"longitudeType\":\"0\"}]"}
+
+

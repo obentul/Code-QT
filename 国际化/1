@@ -1,0 +1,168 @@
+#1     ========================================================================================================
+
+qt翻译方案中有三个工具：Linguist，lupdate 和 lrelease 。
+
+----Release managers----
+lupdate 用来同步 源码 和 翻译内容
+lrelease 用来产生翻译文件(ts文件)
+
+----翻译人员----
+Linguist 是有界面的工具，提供给 翻译人员使用，翻译人员通过这个软件来录入翻译对照信息，然后软件会自动生成ts文件
+
+----开发人员----
+完成编码工作
+
+
+
+qt安装目录中Src\qttranslations\translations中有很多样例文件，都是ts后缀。这些文件提供了很多常用的多语言翻译参考
+
+
+#2     ========================================================================================================
+
+wiki对于翻译也有解释 ： https://wiki.qt.io/Qt_Localization
+
+
+#3     ========================================================================================================
+
+qt程序可以通过实例化并install QTranslator类来完成翻译功能的加载。
+
+
+  int main(int argc, char *argv[])
+  {
+      QApplication app(argc, argv);
+
+      QTranslator qtTranslator;
+      qtTranslator.load("qt_" + QLocale::system().name(),
+              QLibraryInfo::location(QLibraryInfo::TranslationsPath));
+      app.installTranslator(&qtTranslator);
+
+      QTranslator myappTranslator;
+      myappTranslator.load("myapp_" + QLocale::system().name());
+      app.installTranslator(&myappTranslator);
+
+      ...
+      return app.exec();
+  }
+
+
+#4     ========================================================================================================
+
+动态翻译：某些软件支持语言设置功能，那么如果进行语言切换，那么 QTranslator 应该能捕获这个信号，然后应用于
+	  所有使用QTranslator的表示上(QLabel，QTextField等等)
+
+在widget体系中，上述动态翻译的实现方式为，重写widget组件的changeEvent函数，然后在其中查看截获的是不
+是QEvent::LanguageChange,如果是，则重新设置widget中的文字。
+
+  void MyWidget::changeEvent(QEvent *event)
+  {
+      if (event->type() == QEvent::LanguageChange) {
+          titleLabel->setText(tr("Document Title"));
+          ...
+          okPushButton->setText(tr("&OK"));
+      } else
+          QWidget::changeEvent(event);
+  }
+
+QEvent::LanguageChange 事件会在安装 QTranslator的时候产生。 QCoreApplication::installTranslator()
+
+也可以手动给指定的widget派发 QEvent::LanguageChange 事件
+
+
+#5     =======================================================================================================
+
+Release managers如何完成自己的工作
+
+-- lupdate --
+1） 使用lupdate遍历pro文件，lupdate会遍历pro文件中罗列的 cpp h qml 文件。然后在这些文件中查找所有可以翻译的
+    字符串，然后生成 ts文件(原本没有ts文件的话)，或者更新当前ts文件(如果已经有ts文件)。在命令行中可以指定
+    新生成ts文件的路径和名称，也可以指定需要更新的ts文件的路径和名称。
+	注：是否可以把ts文件的名称和路径写入pro文件？？？
+
+2） 把ts文件给 翻译人员 ，翻译人员拿到文件后，使用 Linguist打开文件，然后在软件中编辑完善ts文件的翻译部分
+
+3） Release managers需要定期更新ts文件，以便翻译人员能够及时获得开发人员使用在代码中的新的需要翻译的字符串
+
+-- lrelease --
+4） 使用lrelease处理ts文件，产出QM文件，QM文件是可直接被开发应用使用的 “二进制文件” 。既然是二进制文件且可以
+    直接被应用程序调用，那么QM文件必定具备 “快速” 和 “封装不可见” 的优点。
+
+	注：lrelease处理ts文件产生QM文件，这个动作既可以 使用命令行独立完成，也可以写到pro文件中，在lupdate的
+	    时候就完成。
+	   （*） 一定要把产生QM文件的流程写到pro文件中，不然别人开发每次都要手动操作。
+
+    lrelease文件在处理ts文件时，只处理其中被标记为“finished”状态的。不是此状态的都使用原字符串，不进行翻译
+
+
+
+
+
+#6     ========================================================================================================
+
+ts 文件的格式就是简单的 xml文件 。 lupdate可以生产 ts文件的增量patch --> XLIFF文件(.xlf) , 以便于版本控制。
+
+#7     ========================================================================================================
+
+lupdate 和 lrelease 的用法
+
+
+
+#8     ========================================================================================================
+
+Qt Linguist 的 使用
+
+Linguist会遍历ts文件，同时在源码中找到所有使用tr函数的地方，然后在“sources an forms”中展示出来
+
+#9     ========================================================================================================
+
+前面提到了如何在应用程序中开启 翻译模块 ， 其中提到了一个关键的类  -->  QTranslator
+
+一个QTranslator实例中包含了一组ts文件，每一个文件都是“ 一种语言对应另一种语言 ”的对应模式。因此，如果希望
+当前应用程序可以使用多种翻译，那么可以把所有qm文件都注册到实例中，然后根据需要切换。
+
+QTranslator提供接口来检索qm文件和读取需要的值.
+
+用法如下：
+
+  int main(int argc, char *argv[])
+  {
+      QApplication app(argc, argv);
+
+      QTranslator translator;
+      // look up e.g. :/translations/myapp_de.qm
+      if (translator.load(QLocale(), QLatin1String("myapp"), QLatin1String("_"), QLatin1String(":/translations")))
+          app.installTranslator(&translator);
+
+      QPushButton hello(QCoreApplication::translate("main", "Hello world!"));
+      hello.resize(100, 30);
+
+      hello.show();
+      return app.exec();
+  }
+
+
+注意：QTranslator实例必须在需要使用翻译的widget前面创建
+
+
+
+
+（*）当把多个翻译文件install一个应用中时，最后添加的那个将会作为首选项，如果没找到，则向前推，一直到第一个install
+     的翻译文件位置，如果第一个也没有，则使用原来的字符串
+
+	技巧：可以先removeTranslator某个翻译文件，再isntallTranslator这个翻译文件，以把它放到队列的尾部，从而
+              成为最先被查询的翻译文件  （先进后出的原则，和栈一样）
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,27 @@
+
+c++:
+
+TaskPointInfo *tmp1;
+m_taskPointPage->setProperty("poinInfo",tmp1);
+
+
+qml:
+
+Rectangle {
+    id:root
+    color:"blue"
+
+    property int pointIndex:0
+    property TaskPointInfo poinInfo
+
+
+
+
+上述操作会导致  ： error: C2248: “QVariant::QVariant”: 无法访问 private 成员(在“QVariant”类中声明)
+
+需要找到可行的方法类实现 c++ 到 qml 对于类实例的传递
+
+
+
+解决方法见：
+http://www.it610.com/article/4905673.htm

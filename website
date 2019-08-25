@@ -1,0 +1,192 @@
+https://www.cnblogs.com/pyw0818/p/qt5.html
+
+
+【官网】
+
+官网：https://www.qt.io/
+下载：http://download.qt.io/
+文档：http://doc.qt.io/
+论坛：https://forum.qt.io/
+Wiki：http://wiki.qt.io/Main
+
+
+
+
+【中文社区】
+
+QTCN：http://www.qtcn.org
+QTER：http://www.qter.org/
+CSDN：http://bbs.csdn.net/forums/Qt/
+
+
+【专栏】
+
+Qt 实战一二三：http://blog.csdn.net/column/details/qshare.html
+Qt学习之路：https://www.devbean.net/2012/08/qt-study-road-2-catelog/
+Qt 编程指南：https://qtguide.ustclug.org/
+Qt高级编程视频：https://www.bilibili.com/video/av14005857/
+
+
+----- 分类文章 -----
+
+【Qt基础】
+
+Qt之pro配置详解：http://blog.csdn.net/liang19890820/article/details/51774724
+
+ *.pro、*.pri、*.prf、*.prl四种文件的简单介绍：https://www.cnblogs.com/lyggqm/p/6288463.html
+
+qmake的使用：https://www.cnblogs.com/oloroso/p/4595181.html
+
+ 
+
+【窗口】
+
+不带标题栏（FramelessWindowHint）的窗体移动及调整大小：http://blog.csdn.net/luols/article/details/48733721
+
+界面缩放（QSizePolicy）：http://blog.csdn.net/liang19890820/article/details/51986284
+
+无框窗体：https://github.com/Bringer-of-Light/Qt-Nice-Frameless-Window
+
+QtFlex5：https://github.com/JackyDing/QtFlex5
+
+Qt下双屏的显示方法：http://blog.csdn.net/wlff_csdn/article/details/72676796
+
+Qt5 多显示器获取不同显示器的分辨率和位置的方法：https://www.cnblogs.com/blumia/p/qt5-multi-monitor.html
+
+ 
+
+【Qss】
+
+Qt之界面实现技巧：http://blog.sina.com.cn/s/blog_a6fb6cc90101dech.html
+
+Qt的Qss样式：https://www.cnblogs.com/584709796-qq-com/p/4973216.html
+
+QSS界面美化1：http://blog.csdn.net/sinat_24206709/article/details/55805254
+
+QSS界面美化2：http://blog.csdn.net/sinat_24206709/article/details/55806807
+
+QSS界面美化3：http://blog.csdn.net/sinat_24206709/article/details/56270384
+
+Qss样式集合(持续更新)：http://blog.csdn.net/tianzhihen_wq/article/details/45370009
+
+Qt之QSS（白色靓丽）：http://blog.csdn.net/liang19890820/article/details/51992137
+
+Qt之QSS（黑色炫酷）：http://blog.csdn.net/liang19890820/article/details/51992070
+
+ 
+
+【Qt绘图】
+
+QT反锯齿：http://blog.csdn.net/flylokj/article/details/46621665
+
+Qt的QImage类：http://blog.csdn.net/c_arm/article/details/6673654
+
+Qt的双缓冲技术（double buffering）：http://blog.csdn.net/davidsu33/article/details/40317587
+
+Qt双缓冲机制：http://blog.csdn.net/rl529014/article/details/51658350
+
+ 
+
+【Qt 序列化】
+
+QDataStream序列化的使用：https://www.cnblogs.com/Pymcj/p/6702380.html
+
+QT序列化操作：http://www.bubuko.com/infodetail-1317237.html
+
+QT序列化操作（比较复杂和完善）：http://www.cnblogs.com/findumars/p/5169956.html
+
+Qt中的JSON操作：http://blog.csdn.net/amnes1a/article/details/68957112
+
+Qt中 使用Json 对自定义对象进行序列与反序列化：http://www.bubuko.com/infodetail-1583349.html
+
+ 
+
+【Qt的智能指针】
+
+Qt 中的智能指针：http://blog.csdn.net/liyuanbhu/article/details/77825655
+
+Qt浅谈之一：内存泄露（总结）：http://blog.csdn.net/taiyang1987912/article/details/29271549
+
+Qt5使用内存泄露检测工具—VLD：http://blog.csdn.net/q5707802/article/details/45181343
+
+ 
+
+【Qt的反射】
+
+Qt类反射机制：http://blog.csdn.net/kenier/article/details/62041312
+
+Qt5之反射机制（内省）：https://www.cnblogs.com/RainyBear/p/5251440.html
+
+深入Qt 学习 -- 反射机制：http://blog.csdn.net/playstudy/article/details/7861329
+
+ 
+
+【字符串QString】
+
+Qt 中QString 字符串操作：连接、组合、替换、去掉空白字符：https://www.cnblogs.com/meime7/p/6432529.html
+
+Qt string与QString之间的转换：http://blog.csdn.net/hellokandy/article/details/55254071
+
+Qt中 QString 和int， char等的“相互”转换：http://blog.csdn.net/ei__nino/article/details/7297791
+
+Qt中文编码和QString类Unicode编码转换：http://blog.csdn.net/g423tgl234/article/details/52222569
+
+qt 字符串编码方式转换：http://blog.csdn.net/u012613604/article/details/53995926
+
+QString内部仍采用UTF-16存储数据且不会改变（一共10种不同情况下的编码）：https://www.cnblogs.com/findumars/p/4553424.html
+
+ 
+
+【Json解析】
+
+Qt之JSON生成与解析：http://blog.csdn.net/liang19890820/article/details/52767153
+
+Qt中的JSON操作：http://blog.csdn.net/amnes1a/article/details/68957112
+
+JSON - Qt 对 JSON的处理：https://www.cnblogs.com/Pan-Z/p/6425121.html
+
+qt5 解析Json文件：http://blog.csdn.net/fox64194167/article/details/50193447
+
+Qt5对Json的读写总结 浅析：http://blog.csdn.net/zp1352472310/article/details/40741875
+
+ 
+
+【多语言】
+
+ qt 之 国际化（中英文切换）：http://blog.csdn.net/baidu_33570760/article/details/71159682
+
+QT5（10）语言国际化 动态修改：http://blog.csdn.net/qq_16234613/article/details/53811638
+
+Qt实现多国语言（即界面翻译）可实时进行切换：http://qzher.com/?p=589
+
+QT实现多国语言的动态切换：http://blog.csdn.net/wang_hufeng/article/details/39676085
+
+ 
+
+【多线程】
+
+Qt多线程相关教学视频：https://www.bilibili.com/video/av4056436/
+
+ 
+
+【网络请求】
+
+qt5使用curl实现文件下载的示例程序：http://www.cnblogs.com/findumars/p/5857971.html
+
+Qt 之 使用 https:// 发送 HTTP请求：http://blog.csdn.net/goforwardtostep/article/details/53588961
+
+QT5.1 调用https：https://www.cnblogs.com/felix-wang/p/6248309.html
+
+QT https协议请求失败的问题：http://blog.csdn.net/hiwoshixiaoyu/article/details/72763130
+
+Qt c++以restful方式模拟http与https请求方法：http://blog.csdn.net/aptweasel/article/details/54632714
+
+QT中支持https连接  ：http://blog.163.com/modingfa_002/blog/static/11092546620176125357408/
+
+Qt 之 HTTP 请求下载（支持断点续传）：http://blog.csdn.net/GoForwardToStep/article/details/52704464
+
+ 
+
+【程序单例】
+
+单例（QSingleApplication）：http://blog.csdn.net/playstudy/article/details/7796691

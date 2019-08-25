@@ -1,0 +1,28 @@
+首先需要创建qml的 Javascript模板，即component
+
+var component = Qt.createComponent("Button.qml");
+
+同时，可以使用component.status属性来监控component的创建进度。从qml到javascript模板需要一段时间。
+
+if (component.status == Component.Ready){
+ //创建javascript成功
+}
+
+最后，通过Component.createObject() 来创建javascript模板的实例
+
+var button = component.createObject(container);
+
+此时，即可获得Button.qml的实例，button作为引用指针
+
+
+
+
+
+===================================================
+
+
+
+如果希望直接通过qml文件创建实例，可以使用Qt.createQmlObject()。这样就跳过了中间创建compoent的步骤
+
+
+

@@ -1,0 +1,15 @@
+                                Label{//图标说明
+                                    anchors.top: icon_1.bottom
+                                    anchors.topMargin: 1
+                                    anchors.horizontalCenter: parent.horizontalCenter		//Label居中靠齐parent
+                                    horizontalAlignment:Text.AlignHCenter			//Label中的文字居中显示
+                                    font.pixelSize: 11
+                                    font.family: myMDCCommand.Language?"微软雅黑":"Arial"
+                                    color:"#697d8e"
+                                    text:name
+                                    elide: Text.ElideRight					//右省略
+                                    width: 33
+                                }‘
+
+
+PS：如果不指定horizontalAlignment:Text.AlignHCenter，将导致文字左靠齐parent

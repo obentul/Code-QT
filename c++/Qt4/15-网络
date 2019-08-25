@@ -1,0 +1,2 @@
+使用QCoreApplication替代QApplication，可以避免链接QtGui库，一般做后台程序的时候会使用。
+

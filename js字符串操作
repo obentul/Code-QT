@@ -1,0 +1,5 @@
+删除首个字符   str = str.substr(1)
+
+获取第一个字符  char = str.substr(0,1)
+
+

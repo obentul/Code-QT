@@ -28,3 +28,8 @@ we strongly recommend that all subclasses of QObject use the Q_OBJECT macro rega
 actually use signals, slots, and properties.
 如果想使用信号和槽以及属性，那么必须满足#2的1和2,即使是不使用这些东西，那么在完成父子类转型的时候依旧会遇到问题，因此强烈推荐使用
 QObject和Q_OBJECT macro修饰每一个需要在 QT 中使用的类
+
+
+#5 -- Q_OBJECT宏
+
+

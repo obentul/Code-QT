@@ -1,0 +1,11 @@
+如果这两个qml不在同一个目录下，那么在import的时候时候需要制定路径，或者
+设置import路径，这里先说手工制定相对路径
+
+
+在指定相对路径的时候，当定位当响应的目录后，应该在最后加一个点，比如
+
+import "../multihistory/."
+
+而 
+
+import "../multihistory/"  或者 import "../multihistory"  都会报错

@@ -1,0 +1,27 @@
+QML中,字符串可以使用 qsTr(),qsTranslate(), qsTrId(), QT_TR_NOOP(), QT_TRANSLATE_NOOP(), and QT_TRID_NOOP() 函数来修饰和标记。已达到翻译的目的
+
+工作原理：
+凡是使用上述函数修饰的字符串，执行过程中都会被指向“翻译文件”，然后在翻译文件中找到对应的条目。翻译文件由自己编写制定
+
+使用%x完成字符串的自定义输入：
+Text {
+      text: qsTr("File %1 of %2").arg(counter).arg(total)
+}
+%1 接收 arg(counter)     %2 接收 arg(total)
+
+
+使用%Lx完成字符串的本地化：
+每个地区对于字符串的表达都有不同的格式，比如针对如下的数字，不同国家的表达不一样：
+Text {
+      text: qsTr("%L1").arg(total)
+}
+如果total是4321.56，那么英国是4,321.56，德国则是4.321，56
+
+
+日期，时间和货币的国际化：
+  Text {
+      text: qsTr("Date %1").arg(Date().toLocaleString(Qt.locale()))
+  }
+
+
+
